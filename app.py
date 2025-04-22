@@ -1162,14 +1162,14 @@ else:
         
         pdf.ln(10)
         
-        # Top 5 Tickets by Company section - now on the same page, no add_page()
+        # Top 10 Tickets by Company section - now on the same page, no add_page()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Top 5 Tickets by Company', 0, 1, 'L')
+        pdf.cell(0, 10, 'Top 10 Tickets by Company', 0, 1, 'L')
         
         if 'Company' in dataframe.columns:
-            # Get top 5 companies by ticket count
-            company_counts = dataframe['Company'].value_counts().head(5)
+            # Get top 10 companies by ticket count
+            company_counts = dataframe['Company'].value_counts().head(10)
             
             # Create table header with colored background
             pdf.set_fill_color(239, 246, 255)  # Light blue background
