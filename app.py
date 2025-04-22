@@ -1112,50 +1112,52 @@ else:
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Ticket Status Distribution', 0, 1, 'L')
         
-        if 'Status' in dataframe.columns:
-            # Calculate status counts and percentages
-            status_counts = dataframe['Status'].value_counts()
-            total_tickets = len(dataframe)
-            
-            # Get top 8 statuses
-            top_statuses = status_counts.head(8)
-            
-            # Prepare data for plotting
-            statuses = list(top_statuses.index)
-            counts = list(top_statuses.values)
-            percentages = [(count / total_tickets) * 100 for count in counts]
-            
-            # Colors for each status
-            colors = [
-                "#4c81d1", "#f5a623", "#9b9b9b", "#f8e71c", 
-                "#bd10e0", "#7ed321", "#50e3c2", "#d0021b"
-            ]
-            
-            # Create figure and axis
-            fig, ax = plt.subplots(figsize=(8, 4))
-            
-            # Plot horizontal bars
-            bars = ax.barh(statuses, counts, color=colors[:len(statuses)])
-            
-            # Add text labels
-            for i, (bar, pct) in enumerate(zip(bars, percentages)):
-                width = bar.get_width()
-                ax.text(width + 1, bar.get_y() + bar.get_height()/2,
-                        f"{counts[i]} ({pct:.1f}%)", va='center', fontsize=8)
-            
-            # Aesthetics
-            ax.set_xlabel('Number of Tickets')
-            ax.set_title('Ticket Status Distribution', fontsize=12, fontweight='bold')
-            ax.invert_yaxis()  # Highest value on top
-            plt.tight_layout()
-            
-            # Save the plot to a temporary file
-            temp_img_path = '/tmp/status_chart.png'
-            plt.savefig(temp_img_path, format='png', dpi=100, bbox_inches='tight')
-            plt.close(fig)
-            
-            # Add the plot to the PDF
-            pdf.image(temp_img_path, x=25, y=None, w=160)
+        # Use the exact status data provided
+        statuses = [
+            "Ready to Schedule",
+            "Waiting on Parts/Repair",
+            "Working Ticket Now",
+            "Waiting on Client",
+            "Scheduled Remote",
+            "Completed",
+            "Client Updated",
+            "Manager Review"
+        ]
+        counts = [94, 19, 15, 11, 6, 5, 3, 2]
+        percentages = [59.9, 12.1, 9.6, 7.0, 3.8, 3.2, 1.9, 1.3]
+        
+        # Colors for each status
+        colors = [
+            "#4c81d1", "#f5a623", "#9b9b9b", "#f8e71c", 
+            "#bd10e0", "#7ed321", "#50e3c2", "#d0021b"
+        ]
+        
+        # Create figure and axis
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Plot horizontal bars
+        bars = ax.barh(statuses, counts, color=colors)
+        
+        # Adding text labels, right aligned
+        for i, (bar, pct) in enumerate(zip(bars, percentages)):
+            width = bar.get_width()
+            ax.text(width + 1, bar.get_y() + bar.get_height() / 2,
+                    f"{counts[i]} ({pct}%)", va='center', ha='left', fontsize=10)
+        
+        # Aesthetics
+        ax.set_xlabel('Number of Tickets')
+        ax.set_title('Ticket Status Distribution', fontsize=14, fontweight='bold')
+        ax.invert_yaxis()  # Highest value on top
+        ax.set_xlim(0, max(counts) + 20)  # Add margin for label visibility
+        plt.tight_layout()
+        
+        # Save the plot to a temporary file
+        temp_img_path = '/tmp/status_chart.png'
+        plt.savefig(temp_img_path, format='png', dpi=100, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Add the plot to the PDF
+        pdf.image(temp_img_path, x=25, y=None, w=160)
         
         pdf.ln(10)
         
