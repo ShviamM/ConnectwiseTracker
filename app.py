@@ -885,10 +885,17 @@ else:
         use_container_width=True
     )
     
-    # Create enhanced PDF export function for comprehensive executive report
-    def create_pdf(dataframe):
+    # Create enhanced PDF export function for comprehensive executive report with customizable branding
+    def create_pdf(dataframe, company_name="COMPANY", brand_color=(41, 128, 185), logo_size=40, include_timestamp=True):
         # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
+            def __init__(self, company_name, brand_color, logo_size, include_timestamp):
+                super().__init__()
+                self.company_name = company_name
+                self.brand_color = brand_color
+                self.logo_size = logo_size
+                self.include_timestamp = include_timestamp
+            
             def header(self):
                 # Use Base64 encoded image as logo
                 # Read the Base64 string from file
@@ -909,38 +916,42 @@ else:
                     with open(temp_filename, 'wb') as f:
                         f.write(base64.b64decode(logo_b64))
                     
-                    # Add image to PDF
-                    self.image(temp_filename, x=160, y=8, w=40)
+                    # Add image to PDF with custom size
+                    self.image(temp_filename, x=210-self.logo_size-10, y=8, w=self.logo_size)
                     
                     # Clean up the temporary file
                     os.unlink(temp_filename)
                     
                 except Exception as e:
                     # Fallback to text-based logo if there's any error
-                    # Draw logo background
-                    self.set_fill_color(41, 128, 185)  # Blue background
-                    self.rect(160, 8, 40, 18, style='F')
+                    # Draw logo background with custom brand color
+                    self.set_fill_color(*self.brand_color)  # Use custom brand color
+                    x_pos = 210-self.logo_size-10  # Right-aligned position
+                    self.rect(x_pos, 8, self.logo_size, 18, style='F')
                     
-                    # Add border
-                    self.set_draw_color(25, 80, 115)  # Darker blue border
+                    # Add border - darker shade of brand color
+                    darker_color = tuple(max(0, c-40) for c in self.brand_color)
+                    self.set_draw_color(*darker_color)
                     self.set_line_width(0.5)
-                    self.rect(160, 8, 40, 18, style='D')
+                    self.rect(x_pos, 8, self.logo_size, 18, style='D')
                     
                     # Add company name/text
                     self.set_font('Arial', 'B', 12)
                     self.set_text_color(255, 255, 255)  # White text
-                    self.set_xy(160, 13)
-                    self.cell(40, 8, 'COMPANY', 0, 0, 'C')
+                    self.set_xy(x_pos, 13)
+                    self.cell(self.logo_size, 8, self.company_name, 0, 0, 'C')
                 
-                # Add title and subtitle
+                # Add title and subtitle with custom brand color
                 self.set_font('Arial', 'B', 15)
-                self.set_text_color(30, 58, 138)  # Dark blue color
+                self.set_text_color(*self.brand_color)  # Use custom brand color
                 self.set_xy(10, 10)
                 self.cell(0, 10, 'NOC - Security Ticket Dashboard', 0, 1, 'C')
                 
-                self.set_font('Arial', 'I', 10)
-                self.set_text_color(100, 100, 100)
-                self.cell(0, 5, f'Executive Report - Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1, 'C')
+                # Add generation timestamp based on user preference
+                if self.include_timestamp:
+                    self.set_font('Arial', 'I', 10)
+                    self.set_text_color(100, 100, 100)
+                    self.cell(0, 5, f'Executive Report - Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1, 'C')
                 
                 # Add a line
                 self.set_draw_color(59, 130, 246)  # Blue line
@@ -954,8 +965,8 @@ else:
                 self.set_text_color(100, 100, 100)
                 self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
                 
-        # Create PDF object
-        pdf = PDF()
+        # Create PDF object with custom branding
+        pdf = PDF(company_name, brand_color, logo_size, include_timestamp)
         pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
         
@@ -1229,20 +1240,60 @@ else:
         
         return pdf.output(dest='S').encode('latin1')
     
-    # Simple PDF download button without the explanatory section
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Download section with customizable branding
+    st.markdown("<h2 class='subheader'>Export Options</h2>", unsafe_allow_html=True)
     
-    with col2:
+    # Create two columns - one for settings, one for download
+    brand_col, download_col = st.columns([3, 2])
+    
+    with brand_col:
+        st.markdown("<h4>Customize Report Branding</h4>", unsafe_allow_html=True)
+        
+        # Company name customization
+        company_name = st.text_input("Company Name for Report", "COMPANY", 
+                                    help="This name will appear in the report header")
+        
+        # Color customization for branding
+        brand_color = st.color_picker("Brand Color", "#2980b9", 
+                                    help="Select your brand color for the report")
+        
+        # Logo size option
+        logo_size = st.slider("Logo Size", min_value=20, max_value=60, value=40, 
+                            help="Adjust the size of your logo in the report")
+        
+        # Include timestamp option
+        include_timestamp = st.checkbox("Include Timestamp", value=True,
+                                       help="Add generation timestamp to report")
+    
+    with download_col:
+        st.markdown("<h4>Download Options</h4>", unsafe_allow_html=True)
+        
+        # Add some space
+        st.write("")
+        st.write("")
+        
+        # Convert hex color to RGB tuple
+        def hex_to_rgb(hex_color):
+            hex_color = hex_color.lstrip('#')
+            return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        
+        # Generate PDF report with custom branding
+        rgb_color = hex_to_rgb(brand_color)
+        
         try:
-            pdf_data = create_pdf(filtered_df)
+            pdf_data = create_pdf(filtered_df, company_name, rgb_color, logo_size, include_timestamp)
             st.download_button(
-                label="📊 Download Security Report (PDF)",
+                label="🔽 Download Executive Report (PDF)",
                 data=pdf_data,
-                file_name=f"NOC_Security_Report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+                file_name=f"security_tickets_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
                 mime="application/pdf",
-                help="Download a comprehensive PDF report with the current filtered data",
+                help="Download a comprehensive PDF report with executive summary and detailed ticket metrics",
                 key="pdf_download"
             )
+            
+            # Add a preview message
+            st.success("Your PDF will include custom branding!")
+            
         except Exception as e:
             st.error(f"Error generating PDF: {str(e)}")
             st.info("PDF generation requires additional configuration.")
