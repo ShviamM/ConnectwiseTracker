@@ -295,10 +295,15 @@ st.markdown("""
 # Application title with enhanced styling
 st.markdown("<h1 class='main-header'>NOC - Security Ticket Dashboard</h1>", unsafe_allow_html=True)
 
-# Header logo
-st.markdown("""
+# Display the new logo in header
+with open('attached_assets/idggKYNyFJ_logos.jpeg', 'rb') as f:
+    logo_bytes = f.read()
+import base64
+logo_b64 = base64.b64encode(logo_bytes).decode()
+
+st.markdown(f"""
 <div style="position: absolute; top: 20px; right: 30px; z-index: 1000;">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAE0UlEQVRo3u2aTWxcRRSFv3PfTGwnccDQRKJCoAqLFIlFV1TsEFRtpIoFbCohsSExb95MnK6EhFSJXREWCIlFpS5YICSQWtsz7yVO1YRK/CyAKoSEgBVSJBbYiZ3EJrHnvsMiVkNwkthvZlzVPqu5c+fc7507//cCJUqUKFGixP0Lk9G73P30XD42o52NOhtfE56sLjsR9zrAtRhVSdrwsxsdJb2ZSMS7M7n8wJ9Gg6xRjPOFRRPPWCORjGkWJVtvOAGgJGNFVjOuMx+JbvEqAALDwjNa54xbr2DM5T9NTCUzbvGW8jLWk4iQ2fRgfVXT9UQ8e2d3+/bVGKupbppvGl5TYtRyG8G1FnH9M+Odznz0x0AiZra1bf+npbm5/e8/tn20kNqKqubXwLsG2mWdSG9DXPQhDqxFnJvIGZjfvs3NiUQ8+1v8odVsGOu+/vO6RLx747Zt65cDR0tzc3sykc4fSXS4YRRD+r5JZqdIW6vlFogA6LoYc/DG1dFfLcaN5PMdozPdO5er9UDt1h2JeCZzLB7P9RtXKbkqGCVbW9i/5KcCSUCBSPKKhb4rua7pYnT0Eoh0vuPDg/uTdy5Xq7G+cbsGbwKGUavbUrDKLIFg1GxTrbixuqr59AKnR7JcnpVRO+eNh4Gba9pGFJR9RrdprgLdXGEbyWrGc11vIL1YKaefxCzm74JEBEbJVH7QV6nTp4ZHZ4zRnLHVfzR//v24JeNHohvfFEqfwbcCGF91WzDhKoVR1dR0CfSz4LuEd1cqnzEwCiRjmjXwrOC1QssFnwhgNKU1jqhPKuXGZzq3oy4QxwPxmkQEjIyTyHX1E3SsEG0k41mFeuE9WCg9fCOg0HJB1CfSrwR9OdPpKt3yikAiZnY7bVNSv1FqJU4i1zUKeulgIjaRjGnWGPdpd+7i9YIBONf1jzHuU8bor+TBv3dJZDO7nBE9Z2FDIbVv19JwdudUPq8DI7/fGr0V9TxwLOAiiJjN7D7idDDWUV0oveLnVj6fvTA8PAbQfaFrcjEdmOK4EOeYK4CrgVSh5fz/jopCPvdl9+nzUwCn+i+OwkRfIURo2NUJ8dlIIRUJ16RQqSjh2vR6DRdKD98IWN1WId1aKD0KrW4Lb83u85VLvU5MAT45fvjqnaY/NT82FnSdgrWRoDUFIBE/d2NZ+fiAqXG8NTfPjXQiG5n1QC37vZF8vqMnm70E4KWjR4FfghDx9e1oTrb1mKnJ05D0s4OfhL3DsYLGX7E2GZiYz2dFOPvD4YP9AEd6ei7v2bn7iEKTFhZ+uJeDRAQ8xYkbub7hYnR0V//gQGBiP9z37ZmqivIfCVWJUFVVXjFw9FRvz9CCtE57xF/y2dWpzLu5bGYC4NXnj1x45omdfxp4TsInhXjWikKCgxN6CesOVtRUvHb5dO+3AAf2J79Ib2t7DNEJTMNaHucLTYxbjnFbCj3nvww0APxHALRv3/EGwgO7LvxpyBiYDUyCJZdJHOD4qYDFAHx/6lw/8MVSdQNfWpzLZl4RekDwdpjlAh5I/i25oXNh/d62Uk7vlYerc8Pfh6xWokSJEiVK3L/8BawvprBrqFFQAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIzLTA0LTIyVDIxOjMxOjM0KzAwOjAwv4e3BAAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMy0wNC0yMlQyMTozMTozNCswMDowMM7aDrgAAAAASUVORK5CYII=" alt="MIT Logo" style="width: 50px; height: auto;">
+    <img src="data:image/jpeg;base64,{logo_b64}" alt="Company Logo" style="width: 80px; height: auto;">
 </div>
 """, unsafe_allow_html=True)
 
@@ -885,16 +890,23 @@ else:
         # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
             def header(self):
-                # Instead of using the image file directly, we'll create the logo programmatically
-                # Draw an orange circle for MIT logo
-                self.set_fill_color(244, 127, 85)  # Orange color
-                self.ellipse(180, 15, 15, 15, style='F')
-                
-                # Add "MIT" text on the logo
-                self.set_font('Arial', 'B', 11)
-                self.set_text_color(0, 0, 0)  # Black color
-                self.set_xy(173, 11)
-                self.cell(15, 8, 'MIT', 0, 0, 'C')
+                # Read and embed the new logo for the PDF report header
+                try:
+                    # Draw the company logo at the top right of the page
+                    # We're creating a custom logo using FPDF primitives to avoid image format issues
+                    
+                    # Draw a colored background for the logo
+                    self.set_fill_color(41, 128, 185)  # Blue background 
+                    self.rect(170, 8, 30, 15, style='F')
+                    
+                    # Add company name/text in white
+                    self.set_font('Arial', 'B', 10)
+                    self.set_text_color(255, 255, 255)  # White text
+                    self.set_xy(170, 10)
+                    self.cell(30, 10, 'COMPANY', 0, 0, 'C')
+                except Exception as e:
+                    # If there's any issue with the logo, continue without it
+                    pass
                 
                 # Add title and subtitle
                 self.set_font('Arial', 'B', 15)
