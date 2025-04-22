@@ -47,8 +47,10 @@ with st.sidebar:
     if uploaded_file is not None:
         try:
             # Read and clean the data
-            df = pd.read_csv(uploaded_file)
+            df = pd.read_csv(uploaded_file, encoding='utf-8-sig')
+            st.write(f"Total rows in CSV: {len(df)}")
             df = clean_data(df)
+            st.write(f"Total rows after cleaning: {len(df)}")
             
             # Store processed data in session state
             st.session_state.data = df
@@ -122,9 +124,9 @@ else:
     if 'Last Update' in df.columns:
         df['Last Update'] = pd.to_datetime(df['Last Update'], errors='coerce')
         mask = (df['Last Update'] >= pd.Timestamp(date_min)) & (df['Last Update'] <= pd.Timestamp(date_max))
-        filtered_df = df[mask]
+        filtered_df = df[mask].copy()  # Using .copy() to avoid SettingWithCopyWarning
     else:
-        filtered_df = df
+        filtered_df = df.copy()
     
     # Apply additional filters
     if 'selected_status' in locals() and selected_status != 'All':
@@ -151,7 +153,7 @@ else:
         if 'Age' in filtered_df.columns:
             try:
                 # Extract numeric value from Age column
-                filtered_df['Age_Numeric'] = filtered_df['Age'].astype(str).str.extract(r'(\d+\.?\d*)').astype(float)
+                filtered_df.loc[:, 'Age_Numeric'] = filtered_df['Age'].astype(str).str.extract(r'(\d+\.?\d*)').astype(float)
                 avg_age = filtered_df['Age_Numeric'].mean()
                 st.metric(
                     label="Average Age (Days)", 
