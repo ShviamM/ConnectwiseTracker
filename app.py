@@ -1210,14 +1210,13 @@ else:
             ax.invert_yaxis()  # Highest value on top
             plt.tight_layout()
             
-            # Save the plot to a BytesIO object
-            img_buf = BytesIO()
-            plt.savefig(img_buf, format='png', dpi=100, bbox_inches='tight')
-            img_buf.seek(0)
+            # Save the plot to a temporary file
+            temp_img_path = '/tmp/status_chart.png'
+            plt.savefig(temp_img_path, format='png', dpi=100, bbox_inches='tight')
             plt.close(fig)
             
             # Add the plot to the PDF
-            pdf.image(img_buf, x=25, y=None, w=160)
+            pdf.image(temp_img_path, x=25, y=None, w=160)
         
         pdf.ln(10)
         
