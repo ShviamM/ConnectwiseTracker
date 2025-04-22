@@ -24,8 +24,8 @@ st.set_page_config(
 )
 
 # Application title
-st.title("Connectwise Ticket Dashboard")
-st.markdown("Upload your Connectwise CSV file to visualize ticket statistics and metrics.")
+st.title("NOC - Security Ticket Dashboard")
+st.markdown("Visualizing security ticket statistics and metrics from Connectwise.")
 
 # Sidebar for file upload and filters
 with st.sidebar:
@@ -115,12 +115,8 @@ with st.sidebar:
             max_value=datetime(2030, 12, 31).date()
         )
         
-        # Time period selector
-        time_period = st.radio(
-            "Select Time Period",
-            options=["Daily", "Weekly", "Monthly"],
-            index=0
-        )
+        # Set default time period to "Daily" without showing selector
+        time_period = "Daily"
         
         # Filter options
         st.subheader("Filters")
@@ -256,7 +252,7 @@ else:
             st.error("Company data not available in the uploaded file.")
 
     # Time trend analysis
-    st.header(f"{time_period} Ticket Trend")
+    st.header("Daily Ticket Trend")
     if 'Last Update' in filtered_df.columns:
         trend_fig = create_ticket_trend_chart(filtered_df, time_period.lower())
         st.plotly_chart(trend_fig, use_container_width=True)
@@ -271,6 +267,37 @@ else:
     else:
         st.error("Resource data not available in the uploaded file.")
     
+    # Top 10 Oldest Tickets section
+    st.header("Top 10 Oldest Tickets")
+    if 'Age' in filtered_df.columns and 'Age_Numeric' in filtered_df.columns:
+        # Sort by age and display top 10 oldest tickets
+        oldest_tickets = filtered_df.sort_values('Age_Numeric', ascending=False).head(10)
+        st.dataframe(
+            oldest_tickets[['Ticket #', 'Age', 'Status', 'Company', 'Summary Description', 'Resources']],
+            hide_index=True,
+            use_container_width=True
+        )
+    else:
+        st.error("Age data not available to show oldest tickets.")
+    
+    # Top 10 Alerts section
+    st.header("Top 10 Alerts")
+    if 'Summary Description' in filtered_df.columns:
+        # Find alerts in ticket descriptions 
+        alerts_mask = filtered_df['Summary Description'].str.contains('Alert|Warning|Critical|Urgent|Emergency|Endgame', case=False, na=False)
+        alert_tickets = filtered_df[alerts_mask].head(10)
+        
+        if not alert_tickets.empty:
+            st.dataframe(
+                alert_tickets[['Ticket #', 'Priority', 'Status', 'Company', 'Summary Description', 'Resources']],
+                hide_index=True,
+                use_container_width=True
+            )
+        else:
+            st.info("No alert tickets found in the dataset.")
+    else:
+        st.error("Summary data not available to show alerts.")
+    
     # Detailed data view
     st.header("Detailed Ticket Data")
     st.dataframe(
@@ -279,10 +306,10 @@ else:
         use_container_width=True
     )
     
-    # Download section
+    # Download as CSV only (removed PDF option)
     st.download_button(
         label="Download Filtered Data as CSV",
         data=filtered_df.to_csv(index=False).encode('utf-8'),
-        file_name=f"connectwise_tickets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        file_name=f"security_tickets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
         mime="text/csv"
     )
