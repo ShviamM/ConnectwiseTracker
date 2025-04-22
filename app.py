@@ -1100,7 +1100,162 @@ else:
         
         pdf.ln(10)
         
-        # Add top 10 oldest tickets section
+        # Add charts and visualizations from the dashboard
+        
+        # 1. Status Distribution Chart (Pie Chart)
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Ticket Status Distribution', 0, 1, 'L')
+        
+        # Get status distribution data
+        if 'Status' in dataframe.columns:
+            status_counts = dataframe['Status'].value_counts()
+            total = status_counts.sum()
+            
+            # Create a simple visual representation
+            pdf.set_font('Arial', '', 9)
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.rect(10, pdf.get_y(), 190, 50, 'D')
+            
+            y_start = pdf.get_y() + 5
+            x_start = 15
+            
+            # Color map for statuses
+            status_colors = {
+                'Open': (239, 68, 68),      # Red
+                'New': (239, 68, 68),       # Red
+                'In Progress': (245, 158, 11),  # Orange
+                'Waiting': (251, 191, 36),  # Yellow
+                'Closed': (16, 185, 129),   # Green
+                'Resolved': (16, 185, 129)  # Green
+            }
+            
+            # Default color if status not in map
+            default_color = (107, 114, 128)  # Gray
+            
+            # Draw visual bars for each status
+            for i, (status, count) in enumerate(status_counts.items()):
+                # Calculate percentage
+                percentage = (count / total) * 100
+                
+                # Use status color or default
+                color = next((status_colors[key] for key in status_colors if key.lower() in status.lower()), default_color)
+                pdf.set_fill_color(*color)
+                
+                # Draw status bar
+                bar_width = min(180 * (percentage / 100), 180)  # Limit to max width
+                pdf.rect(x_start, y_start + (i * 10), bar_width, 7, 'F')
+                
+                # Add status label and count
+                pdf.set_text_color(0, 0, 0)
+                pdf.set_xy(x_start + bar_width + 5, y_start + (i * 10))
+                pdf.cell(50, 7, f"{status}: {count} ({percentage:.1f}%)", 0, 1)
+        
+        pdf.ln(60)
+        
+        # 2. Ticket Priority Distribution
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Ticket Priority Distribution', 0, 1, 'L')
+        
+        # Count tickets by priority
+        priority_counts = {
+            'Urgent': len(dataframe[dataframe['Priority'].str.contains('Urgent', case=False, na=False)]),
+            'High': len(dataframe[dataframe['Priority'].str.contains('High', case=False, na=False)]),
+            'Medium': len(dataframe[dataframe['Priority'].str.contains('Medium', case=False, na=False)]),
+            'Low': len(dataframe[dataframe['Priority'].str.contains('Low', case=False, na=False)])
+        }
+        
+        # Total count for percentage calculation
+        priority_total = sum(priority_counts.values())
+        
+        # Create colored boxes and percentage bars for priorities
+        pdf.set_font('Arial', '', 10)
+        
+        priority_colors = {
+            'Urgent': (239, 68, 68),    # Red
+            'High': (245, 158, 11),     # Orange
+            'Medium': (251, 191, 36),   # Yellow
+            'Low': (16, 185, 129)       # Green
+        }
+        
+        # Draw priority distribution as horizontal bars
+        y_pos = pdf.get_y() + 5
+        
+        # Draw border around the chart
+        pdf.rect(10, y_pos, 190, 55, 'D')
+        
+        # Draw each priority bar with label and percentage
+        for i, (priority, count) in enumerate(priority_counts.items()):
+            percentage = (count / priority_total) * 100 if priority_total > 0 else 0
+            bar_width = min(150 * (percentage / 100), 150)  # Limit to max width
+            
+            # Set priority color
+            pdf.set_fill_color(*priority_colors[priority])
+            
+            # Draw colored rectangle for the priority
+            pdf.rect(20, y_pos + 10 + (i * 10), 10, 8, 'F')
+            
+            # Draw percentage bar
+            pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
+            
+            # Add priority label and count
+            pdf.set_text_color(0, 0, 0)
+            pdf.set_xy(32, y_pos + 10 + (i * 10))
+            pdf.cell(25, 8, f"{priority}:", 0, 0)
+            
+            # Add count and percentage to the right of the bar
+            pdf.set_xy(60 + bar_width + 5, y_pos + 10 + (i * 10))
+            pdf.cell(40, 8, f"{count} ({percentage:.1f}%)", 0, 1)
+        
+        pdf.ln(70)
+        
+        # 3. Tickets by Company (Top 10)
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Tickets by Company (Top 10)', 0, 1, 'L')
+        
+        if 'Company' in dataframe.columns:
+            # Get top 10 companies by ticket count
+            company_counts = dataframe['Company'].value_counts().head(10)
+            
+            # Create a bar chart representation
+            max_count = company_counts.max()
+            y_pos = pdf.get_y() + 5
+            
+            # Draw a border around the chart
+            pdf.rect(10, y_pos, 190, min(120, 10 + (len(company_counts) * 10)), 'D')
+            
+            # Draw each company bar
+            for i, (company, count) in enumerate(company_counts.items()):
+                # Calculate bar width based on count
+                bar_width = min(150 * (count / max_count), 150)
+                
+                # Alternate colors for better readability
+                if i % 2 == 0:
+                    pdf.set_fill_color(59, 130, 246)  # Blue
+                else:
+                    pdf.set_fill_color(99, 102, 241)  # Indigo
+                
+                # Draw company bar
+                pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
+                
+                # Add company name and count
+                pdf.set_text_color(0, 0, 0)
+                company_name = company
+                if len(company_name) > 15:
+                    company_name = company_name[:12] + '...'
+                pdf.set_xy(15, y_pos + 10 + (i * 10))
+                pdf.cell(40, 8, f"{company_name}", 0, 0)
+                
+                # Add count to the right of the bar
+                pdf.set_xy(60 + bar_width + 5, y_pos + 10 + (i * 10))
+                pdf.cell(20, 8, f"{count}", 0, 1)
+        
+        pdf.ln(min(130, 15 + (len(company_counts) * 10)))
+        
+        # 4. Top 10 oldest tickets section
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 10 Oldest Tickets', 0, 1, 'L')
@@ -1249,20 +1404,60 @@ else:
                 pdf.set_font('Arial', 'I', 10)
                 pdf.cell(0, 10, 'No critical security alerts detected in the current dataset.', 0, 1, 'L')
         
-        # Add Resource Allocation section
-        pdf.ln(10)
+        # Add Resource Allocation section with enhanced visualizations
+        pdf.add_page()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Resource Allocation', 0, 1, 'L')
         
         if 'Resources' in dataframe.columns:
-            # Get top 5 resources by ticket count
-            resource_counts = dataframe['Resources'].value_counts().head(5)
+            # Get top 10 resources by ticket count (expanded from 5)
+            resource_counts = dataframe['Resources'].value_counts().head(10)
             
             pdf.set_font('Arial', '', 10)
             pdf.set_text_color(0, 0, 0)
-            pdf.multi_cell(0, 5, 'The following shows the distribution of tickets among the top 5 technicians:')
+            pdf.multi_cell(0, 5, 'The following shows the distribution of tickets among the top 10 technicians:')
             pdf.ln(5)
+            
+            # Create graphical representation of resource allocation
+            if not resource_counts.empty:
+                max_count = resource_counts.max()
+                y_pos = pdf.get_y() + 5
+                
+                # Draw a border around the chart
+                chart_height = min(120, 10 + (len(resource_counts) * 10))
+                pdf.rect(10, y_pos, 190, chart_height, 'D')
+                
+                # Draw each resource bar
+                for i, (resource, count) in enumerate(resource_counts.items()):
+                    # Calculate bar width based on count
+                    bar_width = min(130 * (count / max_count), 130)
+                    
+                    # Color for resource bars
+                    pdf.set_fill_color(79, 70, 229)  # Purple
+                    
+                    # Draw resource bar
+                    pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
+                    
+                    # Add resource name and count
+                    pdf.set_text_color(0, 0, 0)
+                    resource_name = str(resource) if not pd.isna(resource) else "Unassigned"
+                    if len(resource_name) > 15:
+                        resource_name = resource_name[:12] + '...'
+                    pdf.set_xy(15, y_pos + 10 + (i * 10))
+                    pdf.cell(40, 8, f"{resource_name}", 0, 0)
+                    
+                    # Add count and percentage to the right of the bar
+                    percentage = (count / len(dataframe)) * 100
+                    pdf.set_xy(60 + bar_width + 5, y_pos + 10 + (i * 10))
+                    pdf.cell(40, 8, f"{count} ({percentage:.1f}%)", 0, 1)
+                
+                pdf.ln(chart_height + 10)
+            
+            # Also include tabular data below the chart
+            pdf.set_font('Arial', 'B', 12)
+            pdf.set_text_color(30, 58, 138)
+            pdf.cell(0, 10, 'Technician Details', 0, 1, 'L')
             
             # Create resource allocation table
             pdf.set_fill_color(239, 246, 255)  # Light blue background
@@ -1277,14 +1472,23 @@ else:
             pdf.set_text_color(0, 0, 0)
             
             total_tickets = len(dataframe)
+            row_color = False
             
             for resource, count in resource_counts.items():
                 resource_name = str(resource) if not pd.isna(resource) else "Unassigned"
                 percentage = (count / total_tickets) * 100
                 
-                pdf.cell(80, 7, resource_name[:40], 1, 0, 'L')
-                pdf.cell(30, 7, str(count), 1, 0, 'C')
-                pdf.cell(30, 7, f"{percentage:.1f}%", 1, 1, 'C')
+                # Alternate row colors
+                if row_color:
+                    pdf.set_fill_color(249, 250, 251)  # Light grey
+                else:
+                    pdf.set_fill_color(255, 255, 255)  # White
+                
+                pdf.cell(80, 7, resource_name[:40], 1, 0, 'L', row_color)
+                pdf.cell(30, 7, str(count), 1, 0, 'C', row_color)
+                pdf.cell(30, 7, f"{percentage:.1f}%", 1, 1, 'C', row_color)
+                
+                row_color = not row_color
         
         # No recommendations section as requested - page 3 removed
         
