@@ -1227,10 +1227,9 @@ else:
                 
                 row_color = not row_color
         
-        pdf.ln(10)
+        pdf.ln(20)
         
-        # NEW PAGE LAYOUT - Moving directly to Top 5 Tickets by Company section
-        pdf.add_page()
+        # Top 5 Tickets by Company section - now on the same page, no add_page()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 5 Tickets by Company', 0, 1, 'L')
@@ -1279,7 +1278,7 @@ else:
                 
                 row_color = not row_color  # Alternate row color
         
-        pdf.ln(min(130, 15 + (len(company_counts) * 10)))
+        pdf.ln(15)
         
         # 4. Top 10 oldest tickets section - Now with Resources column
         pdf.set_font('Arial', 'B', 14)
