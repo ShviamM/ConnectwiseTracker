@@ -885,13 +885,21 @@ else:
         # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
             def header(self):
-                # Add MIT logo to top right
-                # Set position for the logo (right side of header)
-                self.image('attached_assets/MIT_1745341936448.png', x=170, y=8, w=20)
+                # Instead of using the image file directly, we'll create the logo programmatically
+                # Draw an orange circle for MIT logo
+                self.set_fill_color(244, 127, 85)  # Orange color
+                self.ellipse(180, 15, 15, 15, style='F')
+                
+                # Add "MIT" text on the logo
+                self.set_font('Arial', 'B', 11)
+                self.set_text_color(0, 0, 0)  # Black color
+                self.set_xy(173, 11)
+                self.cell(15, 8, 'MIT', 0, 0, 'C')
                 
                 # Add title and subtitle
                 self.set_font('Arial', 'B', 15)
                 self.set_text_color(30, 58, 138)  # Dark blue color
+                self.set_xy(10, 10)
                 self.cell(0, 10, 'NOC - Security Ticket Dashboard', 0, 1, 'C')
                 
                 self.set_font('Arial', 'I', 10)
