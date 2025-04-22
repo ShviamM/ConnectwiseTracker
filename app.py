@@ -23,7 +23,7 @@ from utils.visualizations import (
 
 # Set page configuration
 st.set_page_config(
-    page_title="Daily SOC Insights",
+    page_title="NOC Security Dashboard",
     page_icon="🔒",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -296,7 +296,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Application title with enhanced styling
-st.markdown("<h1 class='main-header'>Daily SOC Insights</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-header'>NOC - Security Ticket Dashboard</h1>", unsafe_allow_html=True)
 
 # Display the new logo in header
 with open('attached_assets/idggKYNyFJ_logos.jpeg', 'rb') as f:
