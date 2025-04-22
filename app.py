@@ -1175,9 +1175,8 @@ else:
             pdf.set_fill_color(239, 246, 255)  # Light blue background
             pdf.set_text_color(30, 58, 138)    # Dark blue text
             pdf.set_font('Arial', 'B', 10)
-            pdf.cell(100, 8, 'Company Name', 1, 0, 'C', 1)
-            pdf.cell(30, 8, 'Ticket Count', 1, 0, 'C', 1)
-            pdf.cell(50, 8, 'Percentage', 1, 1, 'C', 1)
+            pdf.cell(135, 8, 'Company Name', 1, 0, 'C', 1)
+            pdf.cell(45, 8, 'Ticket Count', 1, 1, 'C', 1)
             
             # Add table data
             pdf.set_font('Arial', '', 10)
@@ -1205,9 +1204,8 @@ else:
                     pdf.set_fill_color(255, 255, 255)  # White
                 
                 # Add data cells
-                pdf.cell(100, 7, company_name, 1, 0, 'L', row_color)
-                pdf.cell(30, 7, str(count), 1, 0, 'C', row_color)
-                pdf.cell(50, 7, f"{percentage:.1f}%", 1, 1, 'C', row_color)
+                pdf.cell(135, 7, company_name, 1, 0, 'L', row_color)
+                pdf.cell(45, 7, str(count), 1, 1, 'C', row_color)
                 
                 row_color = not row_color  # Alternate row color
         
