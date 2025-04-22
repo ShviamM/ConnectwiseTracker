@@ -613,38 +613,80 @@ else:
         if len(filtered_df) > 0:
             overdue_pct = f"{overdue/len(filtered_df)*100:.1f}%"
     
-    # Render the custom HTML metrics
-    st.markdown(f"""
-    <div class="metrics-container">
-        <div class="metric-card metric-total">
-            <div class="metric-icon">📊</div>
-            <div class="metric-label">Total Tickets</div>
-            <div class="metric-value">{total_tickets}</div>
-            <div>Active ticket count</div>
-        </div>
-        
-        <div class="metric-card metric-age">
-            <div class="metric-icon">⏱️</div>
-            <div class="metric-label">Average Age</div>
-            <div class="metric-value">{avg_age}</div>
-            <div>Days in system</div>
-        </div>
-        
-        <div class="metric-card metric-unassigned">
-            <div class="metric-icon">👤</div>
-            <div class="metric-label">Unassigned Tickets</div>
-            <div class="metric-value">{unassigned}</div>
-            <div class="metric-delta delta-negative">{unassigned_pct} of total</div>
-        </div>
-        
-        <div class="metric-card metric-sla">
-            <div class="metric-icon">⚠️</div>
-            <div class="metric-label">SLA Issues</div>
-            <div class="metric-value">{overdue}</div>
-            <div class="metric-delta delta-negative">{overdue_pct} of total</div>
-        </div>
+    # Create a more standard grid layout for metrics with eye-catching colors
+    # Use Streamlit's built-in layout rather than custom HTML that could render incorrectly
+    
+    # Create a custom container for metrics header
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #EFF6FF, #DBEAFE); 
+                padding: 15px; 
+                border-radius: 10px; 
+                margin-bottom: 15px;
+                border-left: 5px solid #3B82F6;
+                text-align: center;">
+        <h3 style="margin:0; color: #1E3A8A; font-size: 20px;">Key Performance Indicators</h3>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Use Streamlit's columns and metrics
+    col1, col2, col3, col4 = st.columns(4)
+    
+    # Enhanced styling for each metric
+    with col1:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #EFF6FF, #DBEAFE); 
+                    padding: 15px; 
+                    border-radius: 10px; 
+                    text-align: center;
+                    border-top: 4px solid #3B82F6;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="font-size: 28px; font-weight: 700; color: #1E40AF; margin-bottom: 5px;">""" + str(total_tickets) + """</div>
+            <div style="font-size: 16px; color: #4B5563; font-weight: 600;">Total Tickets</div>
+            <div style="margin-top: 10px; font-size: 14px; color: #6B7280;">Active ticket count</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #F0FDF4, #DCFCE7); 
+                    padding: 15px; 
+                    border-radius: 10px; 
+                    text-align: center;
+                    border-top: 4px solid #10B981;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="font-size: 28px; font-weight: 700; color: #047857; margin-bottom: 5px;">""" + str(avg_age) + """</div>
+            <div style="font-size: 16px; color: #4B5563; font-weight: 600;">Average Age</div>
+            <div style="margin-top: 10px; font-size: 14px; color: #6B7280;">Days in system</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FEF2F2, #FEE2E2); 
+                    padding: 15px; 
+                    border-radius: 10px; 
+                    text-align: center;
+                    border-top: 4px solid #EF4444;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="font-size: 28px; font-weight: 700; color: #B91C1C; margin-bottom: 5px;">""" + str(unassigned) + """</div>
+            <div style="font-size: 16px; color: #4B5563; font-weight: 600;">Unassigned Tickets</div>
+            <div style="margin-top: 10px; font-size: 14px; color: #6B7280;"><span style="background-color: #FEE2E2; padding: 2px 6px; border-radius: 12px; color: #B91C1C; font-weight: 500;">""" + str(unassigned_pct) + """ of total</span></div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #FFF7ED, #FFEDD5); 
+                    padding: 15px; 
+                    border-radius: 10px; 
+                    text-align: center;
+                    border-top: 4px solid #F97316;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="font-size: 28px; font-weight: 700; color: #C2410C; margin-bottom: 5px;">""" + str(overdue) + """</div>
+            <div style="font-size: 16px; color: #4B5563; font-weight: 600;">SLA Issues</div>
+            <div style="margin-top: 10px; font-size: 14px; color: #6B7280;"><span style="background-color: #FFEDD5; padding: 2px 6px; border-radius: 12px; color: #C2410C; font-weight: 500;">""" + str(overdue_pct) + """ of total</span></div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Keep the standard metrics but hidden (for compatibility with the rest of the app)
     with st.container():
