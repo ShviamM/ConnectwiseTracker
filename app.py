@@ -1106,67 +1106,6 @@ else:
         
         # Add charts and visualizations from the dashboard
         
-        # 1. Status Distribution Chart (Pie Chart)
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Ticket Status Distribution', 0, 1, 'L')
-        
-        # Get status distribution data
-        if 'Status' in dataframe.columns:
-            status_counts = dataframe['Status'].value_counts()
-            total = status_counts.sum()
-            
-            # Create a simple visual representation
-            pdf.set_font('Arial', '', 9)
-            pdf.set_fill_color(239, 246, 255)  # Light blue background
-            pdf.rect(10, pdf.get_y(), 190, 50, 'D')
-            
-            y_start = pdf.get_y() + 5
-            x_start = 15
-            
-            # Color map for statuses
-            status_colors = {
-                'Open': (239, 68, 68),      # Red
-                'New': (239, 68, 68),       # Red
-                'In Progress': (245, 158, 11),  # Orange
-                'Waiting': (251, 191, 36),  # Yellow
-                'Closed': (16, 185, 129),   # Green
-                'Resolved': (16, 185, 129)  # Green
-            }
-            
-            # Default color if status not in map
-            default_color = (107, 114, 128)  # Gray
-            
-            # Improved compact layout for status bars - with proper check for empty collection
-            max_status_len = max([len(s) for s in status_counts.keys()]) if len(status_counts) > 0 else 0
-            
-            # Draw visual bars for each status - max 8 per page
-            for i, (status, count) in enumerate(status_counts.items()):
-                # Calculate percentage
-                percentage = (count / total) * 100
-                
-                # Use status color or default
-                color = next((status_colors[key] for key in status_colors if key.lower() in status.lower()), default_color)
-                pdf.set_fill_color(*color)
-                
-                # Adjust layout to prevent overflow
-                if i < 8:
-                    # Draw status bar
-                    bar_width = min(120 * (percentage / 100), 120)  # Reduced max width
-                    pdf.rect(x_start, y_start + (i * 10), bar_width, 7, 'F')
-                    
-                    # Add status label and count - using truncated status names if needed
-                    pdf.set_text_color(0, 0, 0)
-                    
-                    # Truncate status if too long
-                    display_status = status
-                    if len(display_status) > 20:
-                        display_status = display_status[:17] + "..."
-                    
-                    # Position label and percentages properly
-                    pdf.set_xy(x_start + bar_width + 5, y_start + (i * 10))
-                    pdf.cell(70, 7, f"{display_status}: {count} ({percentage:.1f}%)", 0, 1)
-        
         # Create Ticket Status Distribution with matplotlib horizontal bar chart
         pdf.ln(10)
         pdf.set_font('Arial', 'B', 14)
