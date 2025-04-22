@@ -1177,17 +1177,17 @@ else:
             status_counts = dataframe['Status'].value_counts()
             total_tickets = len(dataframe)
             
-            # Status emoji mapping
+            # Status indicator mapping with ASCII-compatible symbols
             status_emojis = {
-                'Ready to Schedule': '🟦',
-                'Waiting on Parts': '🟧',
-                'Working Ticket Now': '🟫',
-                'Waiting on Client': '🟨',
-                'Scheduled Remote': '🟪',
-                'Done yet?': '🟩',
-                'Client Updated': '🟦', 
-                'Manager Review': '🟥',
-                'Awaiting Client Update': '🟦'
+                'Ready to Schedule': '[Blue]',
+                'Waiting on Parts': '[Orange]',
+                'Working Ticket Now': '[Brown]',
+                'Waiting on Client': '[Yellow]',
+                'Scheduled Remote': '[Purple]',
+                'Done yet?': '[Green]',
+                'Client Updated': '[Blue]', 
+                'Manager Review': '[Red]',
+                'Awaiting Client Update': '[Blue]'
             }
             
             # Create header row for table
