@@ -890,23 +890,27 @@ else:
         # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
             def header(self):
-                # Read and embed the new logo for the PDF report header
-                try:
-                    # Draw the company logo at the top right of the page
-                    # We're creating a custom logo using FPDF primitives to avoid image format issues
-                    
-                    # Draw a colored background for the logo
-                    self.set_fill_color(41, 128, 185)  # Blue background 
-                    self.rect(170, 8, 30, 15, style='F')
-                    
-                    # Add company name/text in white
-                    self.set_font('Arial', 'B', 10)
-                    self.set_text_color(255, 255, 255)  # White text
-                    self.set_xy(170, 10)
-                    self.cell(30, 10, 'COMPANY', 0, 0, 'C')
-                except Exception as e:
-                    # If there's any issue with the logo, continue without it
-                    pass
+                # Create a more prominent and visually obvious company logo
+                
+                # Draw rounded rectangle with gradient effect for logo background
+                self.set_fill_color(41, 128, 185)  # Blue background
+                self.rect(160, 8, 40, 18, style='F')
+                
+                # Add border to logo
+                self.set_draw_color(25, 80, 115)  # Darker blue border
+                self.set_line_width(0.5)
+                self.rect(160, 8, 40, 18, style='D')
+                
+                # Add company name/text in white with better positioning
+                self.set_font('Arial', 'B', 12)
+                self.set_text_color(255, 255, 255)  # White text
+                self.set_xy(160, 13)
+                self.cell(40, 8, 'COMPANY', 0, 0, 'C')
+                
+                # Draw a white highlight line for style
+                self.set_draw_color(255, 255, 255)
+                self.set_line_width(0.2)
+                self.line(162, 22, 198, 22)
                 
                 # Add title and subtitle
                 self.set_font('Arial', 'B', 15)
