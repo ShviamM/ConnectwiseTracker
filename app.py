@@ -1134,7 +1134,10 @@ else:
             # Default color if status not in map
             default_color = (107, 114, 128)  # Gray
             
-            # Draw visual bars for each status
+            # Improved compact layout for status bars
+            max_status_len = max([len(s) for s in status_counts.keys()]) if status_counts.keys() else 0
+            
+            # Draw visual bars for each status - max 8 per page
             for i, (status, count) in enumerate(status_counts.items()):
                 # Calculate percentage
                 percentage = (count / total) * 100
@@ -1143,14 +1146,23 @@ else:
                 color = next((status_colors[key] for key in status_colors if key.lower() in status.lower()), default_color)
                 pdf.set_fill_color(*color)
                 
-                # Draw status bar
-                bar_width = min(180 * (percentage / 100), 180)  # Limit to max width
-                pdf.rect(x_start, y_start + (i * 10), bar_width, 7, 'F')
-                
-                # Add status label and count
-                pdf.set_text_color(0, 0, 0)
-                pdf.set_xy(x_start + bar_width + 5, y_start + (i * 10))
-                pdf.cell(50, 7, f"{status}: {count} ({percentage:.1f}%)", 0, 1)
+                # Adjust layout to prevent overflow
+                if i < 8:
+                    # Draw status bar
+                    bar_width = min(120 * (percentage / 100), 120)  # Reduced max width
+                    pdf.rect(x_start, y_start + (i * 10), bar_width, 7, 'F')
+                    
+                    # Add status label and count - using truncated status names if needed
+                    pdf.set_text_color(0, 0, 0)
+                    
+                    # Truncate status if too long
+                    display_status = status
+                    if len(display_status) > 20:
+                        display_status = display_status[:17] + "..."
+                    
+                    # Position label and percentages properly
+                    pdf.set_xy(x_start + bar_width + 5, y_start + (i * 10))
+                    pdf.cell(70, 7, f"{display_status}: {count} ({percentage:.1f}%)", 0, 1)
         
         pdf.ln(60)
         
@@ -1159,7 +1171,8 @@ else:
         
         pdf.ln(70)
         
-        # 3. Tickets by Company (Top 10) - on same page to avoid page breaks
+        # 3. Tickets by Company (Top 10) with improved layout
+        pdf.add_page()  # Force a new page for this section
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Tickets by Company (Top 10)', 0, 1, 'L')
@@ -1168,17 +1181,18 @@ else:
             # Get top 10 companies by ticket count
             company_counts = dataframe['Company'].value_counts().head(10)
             
-            # Create a bar chart representation
+            # Create a more compact horizontal bar chart
             max_count = company_counts.max()
             y_pos = pdf.get_y() + 5
             
             # Draw a border around the chart
-            pdf.rect(10, y_pos, 190, min(120, 10 + (len(company_counts) * 10)), 'D')
+            chart_height = min(110, 10 + (len(company_counts) * 10))
+            pdf.rect(10, y_pos, 190, chart_height, 'D')
             
-            # Draw each company bar
+            # Draw each company bar with fixed widths
             for i, (company, count) in enumerate(company_counts.items()):
-                # Calculate bar width based on count
-                bar_width = min(150 * (count / max_count), 150)
+                # Calculate bar width based on count, but limit maximum width
+                bar_width = min(100 * (count / max_count), 100)
                 
                 # Alternate colors for better readability
                 if i % 2 == 0:
@@ -1186,18 +1200,20 @@ else:
                 else:
                     pdf.set_fill_color(99, 102, 241)  # Indigo
                 
-                # Draw company bar
-                pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
-                
-                # Add company name and count
-                pdf.set_text_color(0, 0, 0)
+                # Format company name consistently
                 company_name = company
                 if len(company_name) > 15:
                     company_name = company_name[:12] + '...'
+                
+                # Draw company name first
                 pdf.set_xy(15, y_pos + 10 + (i * 10))
+                pdf.set_text_color(0, 0, 0)
                 pdf.cell(40, 8, f"{company_name}", 0, 0)
                 
-                # Add count to the right of the bar
+                # Draw the bar with proper spacing
+                pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
+                
+                # Add count right after the bar
                 pdf.set_xy(60 + bar_width + 5, y_pos + 10 + (i * 10))
                 pdf.cell(20, 8, f"{count}", 0, 1)
         
