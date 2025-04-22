@@ -1271,87 +1271,10 @@ else:
         
         pdf.ln(15)
         
-        # 4. Top 10 oldest tickets section - Now with Resources column
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Top 10 Oldest Tickets', 0, 1, 'L')
-        
-        if 'Age_Numeric' in dataframe.columns:
-            oldest = dataframe.sort_values('Age_Numeric', ascending=False).head(10)
-            
-            # Create table header with colored background
-            pdf.set_fill_color(239, 246, 255)  # Light blue background
-            pdf.set_text_color(30, 58, 138)    # Dark blue text
-            pdf.set_font('Arial', 'B', 9)
-            pdf.cell(18, 7, 'Ticket #', 1, 0, 'C', 1)
-            pdf.cell(18, 7, 'Priority', 1, 0, 'C', 1)
-            pdf.cell(12, 7, 'Age', 1, 0, 'C', 1)
-            pdf.cell(20, 7, 'Status', 1, 0, 'C', 1)
-            pdf.cell(25, 7, 'Company', 1, 0, 'C', 1)
-            pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
-            pdf.cell(72, 7, 'Summary', 1, 1, 'C', 1)
-            
-            # Add table data
-            pdf.set_font('Arial', '', 8)
-            pdf.set_text_color(0, 0, 0)
-            
-            # Alternate row colors for better readability
-            row_color = False
-            
-            for _, row in oldest.iterrows():
-                # Get values with fallback for missing columns
-                ticket_num = str(row.get('Ticket #', 'N/A'))
-                priority = str(row.get('Priority', 'N/A'))
-                age = str(row.get('Age', 'N/A'))
-                status = str(row.get('Status', 'N/A'))
-                company = str(row.get('Company', 'N/A'))
-                resource = str(row.get('Resources', 'N/A'))
-                summary = str(row.get('Summary Description', 'N/A'))
-                
-                # Truncate long fields
-                if len(summary) > 40:
-                    summary = summary[:37] + '...'
-                if len(company) > 12:
-                    company = company[:9] + '...'
-                if len(resource) > 12:
-                    resource = resource[:9] + '...'
-                
-                # Set fill color for alternating rows
-                if row_color:
-                    pdf.set_fill_color(249, 250, 251)  # Light grey
-                else:
-                    pdf.set_fill_color(255, 255, 255)  # White
-                
-                # Set priority cell color based on level
-                pdf.cell(18, 7, ticket_num[:9], 1, 0, 'L', row_color)
-                
-                # Custom format for priority column
-                if 'urgent' in priority.lower():
-                    pdf.set_text_color(239, 68, 68)  # Red
-                elif 'high' in priority.lower():
-                    pdf.set_text_color(245, 158, 11)  # Orange
-                elif 'medium' in priority.lower():
-                    pdf.set_text_color(251, 191, 36)  # Yellow
-                elif 'low' in priority.lower():
-                    pdf.set_text_color(16, 185, 129)  # Green
-                
-                pdf.cell(18, 7, priority[:9], 1, 0, 'L', row_color)
-                pdf.set_text_color(0, 0, 0)  # Reset text color
-                
-                pdf.cell(12, 7, age[:9], 1, 0, 'L', row_color)
-                pdf.cell(20, 7, status[:12], 1, 0, 'L', row_color)
-                pdf.cell(25, 7, company, 1, 0, 'L', row_color)
-                pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
-                pdf.cell(72, 7, summary, 1, 1, 'L', row_color)
-                
-                row_color = not row_color  # Alternate row color
-        
-        pdf.ln(5)
-        
-        # Removed Critical Security Alerts section (page 5) as requested
+        # Move to page 2
+        pdf.add_page()
         
         # Add Top of Done Yets table including Resources column
-        pdf.add_page()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top Done Yets', 0, 1, 'L')
@@ -1436,7 +1359,83 @@ else:
             
             pdf.ln(20)
         
-        # No recommendations section as requested - page 3 removed
+        # Move to page 3 for Top 10 Oldest Tickets
+        pdf.add_page()
+        
+        # 4. Top 10 oldest tickets section - Now with Resources column
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Top 10 Oldest Tickets', 0, 1, 'L')
+        
+        if 'Age_Numeric' in dataframe.columns:
+            oldest = dataframe.sort_values('Age_Numeric', ascending=False).head(10)
+            
+            # Create table header with colored background
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.set_text_color(30, 58, 138)    # Dark blue text
+            pdf.set_font('Arial', 'B', 9)
+            pdf.cell(18, 7, 'Ticket #', 1, 0, 'C', 1)
+            pdf.cell(18, 7, 'Priority', 1, 0, 'C', 1)
+            pdf.cell(12, 7, 'Age', 1, 0, 'C', 1)
+            pdf.cell(20, 7, 'Status', 1, 0, 'C', 1)
+            pdf.cell(25, 7, 'Company', 1, 0, 'C', 1)
+            pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
+            pdf.cell(72, 7, 'Summary', 1, 1, 'C', 1)
+            
+            # Add table data
+            pdf.set_font('Arial', '', 8)
+            pdf.set_text_color(0, 0, 0)
+            
+            # Alternate row colors for better readability
+            row_color = False
+            
+            for _, row in oldest.iterrows():
+                # Get values with fallback for missing columns
+                ticket_num = str(row.get('Ticket #', 'N/A'))
+                priority = str(row.get('Priority', 'N/A'))
+                age = str(row.get('Age', 'N/A'))
+                status = str(row.get('Status', 'N/A'))
+                company = str(row.get('Company', 'N/A'))
+                resource = str(row.get('Resources', 'N/A'))
+                summary = str(row.get('Summary Description', 'N/A'))
+                
+                # Truncate long fields
+                if len(summary) > 40:
+                    summary = summary[:37] + '...'
+                if len(company) > 12:
+                    company = company[:9] + '...'
+                if len(resource) > 12:
+                    resource = resource[:9] + '...'
+                
+                # Set fill color for alternating rows
+                if row_color:
+                    pdf.set_fill_color(249, 250, 251)  # Light grey
+                else:
+                    pdf.set_fill_color(255, 255, 255)  # White
+                
+                # Set priority cell color based on level
+                pdf.cell(18, 7, ticket_num[:9], 1, 0, 'L', row_color)
+                
+                # Custom format for priority column
+                if 'urgent' in priority.lower():
+                    pdf.set_text_color(239, 68, 68)  # Red
+                elif 'high' in priority.lower():
+                    pdf.set_text_color(245, 158, 11)  # Orange
+                elif 'medium' in priority.lower():
+                    pdf.set_text_color(251, 191, 36)  # Yellow
+                elif 'low' in priority.lower():
+                    pdf.set_text_color(16, 185, 129)  # Green
+                
+                pdf.cell(18, 7, priority[:9], 1, 0, 'L', row_color)
+                pdf.set_text_color(0, 0, 0)  # Reset text color
+                
+                pdf.cell(12, 7, age[:9], 1, 0, 'L', row_color)
+                pdf.cell(20, 7, status[:12], 1, 0, 'L', row_color)
+                pdf.cell(25, 7, company, 1, 0, 'L', row_color)
+                pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
+                pdf.cell(72, 7, summary, 1, 1, 'L', row_color)
+                
+                row_color = not row_color  # Alternate row color
         
         # No contact information footer as requested
         
