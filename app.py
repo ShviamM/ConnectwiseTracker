@@ -1164,69 +1164,7 @@ else:
                     pdf.set_xy(x_start + bar_width + 5, y_start + (i * 10))
                     pdf.cell(70, 7, f"{display_status}: {count} ({percentage:.1f}%)", 0, 1)
         
-        # Add the new Table Format for Status Distribution on first page
-        pdf.ln(20)
-        
-        # Status table header
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Ticket Status Distribution', 0, 1, 'L')
-        
-        if 'Status' in dataframe.columns:
-            # Calculate status counts and percentages
-            status_counts = dataframe['Status'].value_counts()
-            total_tickets = len(dataframe)
-            
-            # Status indicator mapping with ASCII-compatible symbols
-            status_emojis = {
-                'Ready to Schedule': '[Blue]',
-                'Waiting on Parts': '[Orange]',
-                'Working Ticket Now': '[Brown]',
-                'Waiting on Client': '[Yellow]',
-                'Scheduled Remote': '[Purple]',
-                'Done yet?': '[Green]',
-                'Client Updated': '[Blue]', 
-                'Manager Review': '[Red]',
-                'Awaiting Client Update': '[Blue]'
-            }
-            
-            # Create header row for table
-            pdf.set_font('Arial', 'B', 11)
-            pdf.set_fill_color(239, 246, 255)  # Light blue background
-            pdf.set_text_color(30, 58, 138)    # Dark blue text
-            pdf.cell(100, 7, 'Status', 1, 0, 'L', 1)
-            pdf.cell(80, 7, 'Count (%)', 1, 1, 'L', 1)
-            
-            # Add table data with alternating rows
-            pdf.set_font('Arial', '', 10)
-            pdf.set_text_color(0, 0, 0)
-            row_color = False
-            
-            for status, count in status_counts.items():
-                percentage = (count / total_tickets) * 100
-                
-                # Find matching indicator for status
-                status_indicator = '-'
-                for status_key, indicator in status_emojis.items():
-                    if status_key.lower() in status.lower():
-                        status_indicator = indicator
-                        break
-                
-                # Format status with indicator
-                display_status = f"{status_indicator} {status}"
-                
-                # Set alternating row colors
-                if row_color:
-                    pdf.set_fill_color(245, 247, 250)  # Very light grey
-                else:
-                    pdf.set_fill_color(255, 255, 255)  # White
-                
-                # Add row to table
-                pdf.cell(100, 7, display_status[:40], 1, 0, 'L', row_color)
-                pdf.cell(80, 7, f"{count} ({percentage:.1f}%)", 1, 1, 'L', row_color)
-                
-                row_color = not row_color
-        
+        # Removed Ticket Status Distribution as requested
         pdf.ln(20)
         
         # Top 5 Tickets by Company section - now on the same page, no add_page()
