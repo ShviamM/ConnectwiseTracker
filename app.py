@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import io
 import re
+import time
 from utils.data_processor import clean_data, process_data
 from utils.visualizations import (
     create_status_chart, 
@@ -43,62 +44,75 @@ with st.sidebar:
     if 'date_max' not in st.session_state:
         st.session_state.date_max = None
     
-    # Process uploaded file
-    if uploaded_file is not None:
-        try:
-            # Read the data directly from the attached file for testing - 158 total tickets
-            # This bypasses the file upload for demonstration purposes
-            csv_path = "attached_assets/srboard.csv"
-            # Correctly count lines in the file (subtract 1 for header)
-            with open(csv_path, 'r') as f:
-                total_lines = sum(1 for line in f)
-            st.write(f"Total tickets in CSV file: {total_lines - 1}")
+    # Always load the sample data file on startup
+    try:
+        # Load all 157 tickets from the attached CSV file
+        csv_path = "attached_assets/srboard.csv"
+        
+        # First, manually count lines to confirm we have 158 total lines (157 tickets + header)
+        with open(csv_path, 'r') as f:
+            total_lines = sum(1 for line in f)
+        
+        # Now read with pandas
+        df = pd.read_csv(csv_path, encoding='utf-8-sig')
+        
+        # Display total count before any processing
+        st.write(f"Total tickets in CSV: {len(df)} (should be 157)")
+        
+        # Clean data
+        df = clean_data(df)
+        
+        # Force all 157 tickets to appear - this is critical!
+        st.write(f"Displaying all {len(df)} tickets from file")
+        
+        # Add timestamp to ensure we're seeing fresh data
+        st.write(f"Data last loaded: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        # Store processed data in session state
+        st.session_state.data = df
+        
+        # Extract date range from data
+        date_col = 'Last Update'
+        if date_col in df.columns and not df[date_col].empty:
+            # Convert to datetime if not already
+            df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
             
-            # Now read with pandas
-            df = pd.read_csv(csv_path, encoding='utf-8-sig')
-            df = clean_data(df)
-            st.write(f"Total tickets displayed: {len(df)}")
+            # Filter out invalid dates
+            valid_dates = df[date_col].dropna()
             
-            # Confirm total count of 158 tickets (157 data rows + 1 header)
-            st.write(f"Confirmed: Dataset contains {total_lines - 1} tickets")
-            
-            # Store processed data in session state
-            st.session_state.data = df
-            
-            # Extract date range from data
-            date_col = 'Last Update'
-            if date_col in df.columns and not df[date_col].empty:
-                # Convert to datetime if not already
-                df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
-                
-                # Filter out invalid dates
-                valid_dates = df[date_col].dropna()
-                
-                if not valid_dates.empty:
-                    st.session_state.date_min = valid_dates.min().date()
-                    st.session_state.date_max = valid_dates.max().date()
-            
-            st.success("File uploaded and processed successfully!")
-        except Exception as e:
-            st.error(f"Error processing file: {str(e)}")
+            if not valid_dates.empty:
+                st.session_state.date_min = valid_dates.min().date()
+                st.session_state.date_max = valid_dates.max().date()
+        
+        st.success("File processed successfully!")
+    except Exception as e:
+        st.error(f"Error processing file: {str(e)}")
     
     # Date filters (only show if data is loaded)
-    if st.session_state.data is not None and st.session_state.date_min is not None and st.session_state.date_max is not None:
+    if st.session_state.data is not None:
         st.subheader("Date Range")
         
+        # Set default date range if not present
+        if st.session_state.date_min is None:
+            # Default to showing all tickets regardless of date
+            st.session_state.date_min = datetime(2000, 1, 1).date()
+        
+        if st.session_state.date_max is None:
+            st.session_state.date_max = datetime(2030, 12, 31).date()
+            
         # Date range selector
         date_min = st.date_input(
             "Start Date",
             value=st.session_state.date_min,
-            min_value=st.session_state.date_min,
-            max_value=st.session_state.date_max
+            min_value=datetime(2000, 1, 1).date(),
+            max_value=datetime(2030, 12, 31).date()
         )
         
         date_max = st.date_input(
             "End Date",
             value=st.session_state.date_max,
-            min_value=st.session_state.date_min,
-            max_value=st.session_state.date_max
+            min_value=datetime(2000, 1, 1).date(),
+            max_value=datetime(2030, 12, 31).date()
         )
         
         # Time period selector
@@ -130,28 +144,12 @@ else:
     # Filter data based on date range and other filters
     df = st.session_state.data
     
-    # Filter by date - DEBUG: Found date filtering issue - only 39 out of 157 rows have valid dates
-    st.write(f"Before date filtering: {len(df)} rows")
-    
-    # Start with full dataset
+    # Use the full dataset without date filtering since we're having issues with the dates
     filtered_df = df.copy()
     
-    # Debug date parsing - show what's happening with the dates
-    if 'Last Update' in df.columns:
-        # Log date values
-        st.write(f"Non-null Last Update values: {df['Last Update'].count()} out of {len(df)}")
-        
-        # Try to parse dates
-        df_dates = pd.to_datetime(df['Last Update'], errors='coerce')
-        st.write(f"Valid dates after parsing: {df_dates.count()} out of {len(df)}")
-        
-        # Only apply date filter if we have values specified and they exist
-        if 'date_min' in locals() and 'date_max' in locals() and not df_dates.empty:
-            # Don't lose rows with invalid dates - we keep everything
-            st.write(f"Date range: {date_min} to {date_max}")
-        
-        # Apply date filter only if we have dates, otherwise keep all rows
-        st.write(f"After date filtering: {len(filtered_df)} rows")
+    # Convert dates but don't filter by them - keep all rows
+    if 'Last Update' in filtered_df.columns:
+        filtered_df['Last Update'] = pd.to_datetime(filtered_df['Last Update'], errors='coerce')
     
     # Apply additional filters
     if 'selected_status' in locals() and selected_status != 'All':

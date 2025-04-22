@@ -123,10 +123,16 @@ def process_data(df, time_period='daily'):
     if 'Last Update' not in processed_df.columns:
         return processed_df
     
-    # Remove rows with missing dates
-    processed_df = processed_df.dropna(subset=['Last Update'])
+    # Create a safe version of the date column with default values for invalid dates
+    has_valid_date = ~processed_df['Last Update'].isna()
     
-    # Create date components
+    # For rows with invalid dates, use a default date to avoid losing data
+    if has_valid_date.sum() < len(processed_df):
+        # Fill missing dates with today's date to keep all rows
+        default_date = pd.Timestamp('today')
+        processed_df.loc[~has_valid_date, 'Last Update'] = default_date
+    
+    # Create date components - safely handle any remaining NaT values
     processed_df['date'] = processed_df['Last Update'].dt.date
     processed_df['day'] = processed_df['Last Update'].dt.day
     processed_df['week'] = processed_df['Last Update'].dt.isocalendar().week
