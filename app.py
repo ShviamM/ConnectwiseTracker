@@ -1166,56 +1166,98 @@ else:
         
         pdf.ln(60)
         
-        # NOTE: Priority Distribution already shown on first page
-        # Skip the duplicate section and move directly to the next visualization
+        # Add Daily Security Update section
+        pdf.ln(20)
         
-        pdf.ln(70)
-        
-        # 3. Tickets by Company (Top 10) with improved layout
-        pdf.add_page()  # Force a new page for this section
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Tickets by Company (Top 10)', 0, 1, 'L')
+        pdf.cell(0, 10, 'Daily Security Update', 0, 1, 'L')
+        
+        # Add current date for the security update
+        today_date = datetime.now().strftime("%B %d, %Y")
+        pdf.set_font('Arial', 'I', 10)
+        pdf.set_text_color(107, 114, 128)  # Gray text
+        pdf.cell(0, 8, f"Report for: {today_date}", 0, 1, 'L')
+        
+        # Create fancy box for security update
+        pdf.set_fill_color(239, 246, 255)  # Light blue background
+        pdf.set_draw_color(199, 210, 254)  # Border color
+        pdf.rect(10, pdf.get_y(), 190, 30, 'DF')
+        
+        # Add summary text for daily update
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_xy(15, pdf.get_y() + 5)
+        
+        # Calculate metrics for daily update
+        today_tickets = 0
+        high_priority_today = 0
+        
+        if 'Last Update' in dataframe.columns:
+            today = datetime.now().date()
+            today_mask = pd.to_datetime(dataframe['Last Update']).dt.date == today
+            today_tickets = len(dataframe[today_mask])
+            
+            if 'Priority' in dataframe.columns:
+                high_priority_mask = dataframe['Priority'].str.contains('Urgent|High', case=False, na=False)
+                high_priority_today = len(dataframe[today_mask & high_priority_mask])
+        
+        pdf.multi_cell(180, 5, 
+            f"Today's Security Activities: {today_tickets} new tickets processed, " +
+            f"{high_priority_today} high-priority items addressed. " +
+            f"Current focus is on resolving critical alerts and reducing SLA breaches."
+        )
+        
+        pdf.ln(15)
+        
+        # 3. Top 5 Tickets by Company (Table Format)
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Top 5 Tickets by Company', 0, 1, 'L')
         
         if 'Company' in dataframe.columns:
-            # Get top 10 companies by ticket count
-            company_counts = dataframe['Company'].value_counts().head(10)
+            # Get top 5 companies by ticket count
+            company_counts = dataframe['Company'].value_counts().head(5)
             
-            # Create a more compact horizontal bar chart
-            max_count = company_counts.max()
-            y_pos = pdf.get_y() + 5
+            # Create table header with colored background
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.set_text_color(30, 58, 138)    # Dark blue text
+            pdf.set_font('Arial', 'B', 10)
+            pdf.cell(100, 8, 'Company Name', 1, 0, 'C', 1)
+            pdf.cell(30, 8, 'Ticket Count', 1, 0, 'C', 1)
+            pdf.cell(50, 8, 'Percentage', 1, 1, 'C', 1)
             
-            # Draw a border around the chart
-            chart_height = min(110, 10 + (len(company_counts) * 10))
-            pdf.rect(10, y_pos, 190, chart_height, 'D')
+            # Add table data
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
             
-            # Draw each company bar with fixed widths
-            for i, (company, count) in enumerate(company_counts.items()):
-                # Calculate bar width based on count, but limit maximum width
-                bar_width = min(100 * (count / max_count), 100)
-                
-                # Alternate colors for better readability
-                if i % 2 == 0:
-                    pdf.set_fill_color(59, 130, 246)  # Blue
-                else:
-                    pdf.set_fill_color(99, 102, 241)  # Indigo
-                
+            # Alternate row colors for better readability
+            row_color = False
+            
+            # Total for percentage calculation
+            total_tickets = len(dataframe)
+            
+            for company, count in company_counts.items():
                 # Format company name consistently
                 company_name = company
-                if len(company_name) > 15:
-                    company_name = company_name[:12] + '...'
+                if len(company_name) > 35:
+                    company_name = company_name[:32] + '...'
                 
-                # Draw company name first
-                pdf.set_xy(15, y_pos + 10 + (i * 10))
-                pdf.set_text_color(0, 0, 0)
-                pdf.cell(40, 8, f"{company_name}", 0, 0)
+                # Calculate percentage
+                percentage = (count / total_tickets) * 100
                 
-                # Draw the bar with proper spacing
-                pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
+                # Set fill color for alternating rows
+                if row_color:
+                    pdf.set_fill_color(249, 250, 251)  # Light grey
+                else:
+                    pdf.set_fill_color(255, 255, 255)  # White
                 
-                # Add count right after the bar
-                pdf.set_xy(60 + bar_width + 5, y_pos + 10 + (i * 10))
-                pdf.cell(20, 8, f"{count}", 0, 1)
+                # Add data cells
+                pdf.cell(100, 7, company_name, 1, 0, 'L', row_color)
+                pdf.cell(30, 7, str(count), 1, 0, 'C', row_color)
+                pdf.cell(50, 7, f"{percentage:.1f}%", 1, 1, 'C', row_color)
+                
+                row_color = not row_color  # Alternate row color
         
         pdf.ln(min(130, 15 + (len(company_counts) * 10)))
         
@@ -1368,97 +1410,101 @@ else:
                 pdf.set_font('Arial', 'I', 10)
                 pdf.cell(0, 10, 'No critical security alerts detected in the current dataset.', 0, 1, 'L')
         
-        # Add Resource Allocation section with enhanced visualizations
+        # Add Top of Done Yets table
         pdf.add_page()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Resource Allocation', 0, 1, 'L')
+        pdf.cell(0, 10, 'Top of Done Yets', 0, 1, 'L')
         
-        if 'Resources' in dataframe.columns:
-            # Get top 10 resources by ticket count (expanded from 5)
-            resource_counts = dataframe['Resources'].value_counts().head(10)
+        # Add descriptive text for Done Yets table
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(0, 0, 0)
+        pdf.multi_cell(0, 5, 'The following table shows tickets with "Done yet?" status, requiring final verification:')
+        pdf.ln(5)
+        
+        # Get tickets with "Done yet?" status
+        if 'Status' in dataframe.columns:
+            done_yet_tickets = dataframe[dataframe['Status'].str.contains('Done yet', case=False, na=False)].head(5)
             
-            pdf.set_font('Arial', '', 10)
-            pdf.set_text_color(0, 0, 0)
-            pdf.multi_cell(0, 5, 'The following shows the distribution of tickets among the top 10 technicians:')
-            pdf.ln(5)
-            
-            # Create graphical representation of resource allocation
-            if not resource_counts.empty:
-                max_count = resource_counts.max()
-                y_pos = pdf.get_y() + 5
+            if not done_yet_tickets.empty:
+                # Create table header with colored background
+                pdf.set_fill_color(239, 246, 255)  # Light blue background
+                pdf.set_text_color(30, 58, 138)    # Dark blue text
+                pdf.set_font('Arial', 'B', 9)
+                pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
+                pdf.cell(20, 7, 'Priority', 1, 0, 'C', 1)
+                pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
+                pdf.cell(45, 7, 'Company', 1, 0, 'C', 1)
+                pdf.cell(90, 7, 'Summary', 1, 1, 'C', 1)
                 
-                # Draw a border around the chart
-                chart_height = min(120, 10 + (len(resource_counts) * 10))
-                pdf.rect(10, y_pos, 190, chart_height, 'D')
+                # Add table data
+                pdf.set_font('Arial', '', 8)
+                pdf.set_text_color(0, 0, 0)
                 
-                # Draw each resource bar
-                for i, (resource, count) in enumerate(resource_counts.items()):
-                    # Calculate bar width based on count
-                    bar_width = min(130 * (count / max_count), 130)
+                # Alternate row colors for better readability
+                row_color = False
+                
+                for _, row in done_yet_tickets.iterrows():
+                    # Get values with fallback for missing columns
+                    ticket_num = str(row.get('Ticket #', 'N/A'))
+                    priority = str(row.get('Priority', 'N/A'))
+                    age = str(row.get('Age', 'N/A')) if 'Age' in row else 'N/A'
+                    company = str(row.get('Company', 'N/A'))
+                    summary = str(row.get('Summary Description', 'N/A'))
                     
-                    # Color for resource bars
-                    pdf.set_fill_color(79, 70, 229)  # Purple
+                    # Truncate long fields
+                    if len(summary) > 50:
+                        summary = summary[:47] + '...'
+                    if len(company) > 25:
+                        company = company[:22] + '...'
                     
-                    # Draw resource bar
-                    pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
+                    # Set fill color for alternating rows
+                    if row_color:
+                        pdf.set_fill_color(249, 250, 251)  # Light grey
+                    else:
+                        pdf.set_fill_color(255, 255, 255)  # White
                     
-                    # Add resource name and count
-                    pdf.set_text_color(0, 0, 0)
-                    resource_name = str(resource) if not pd.isna(resource) else "Unassigned"
-                    if len(resource_name) > 15:
-                        resource_name = resource_name[:12] + '...'
-                    pdf.set_xy(15, y_pos + 10 + (i * 10))
-                    pdf.cell(40, 8, f"{resource_name}", 0, 0)
+                    # Add data cells
+                    pdf.cell(20, 7, ticket_num[:10], 1, 0, 'L', row_color)
                     
-                    # Add count and percentage to the right of the bar
-                    percentage = (count / len(dataframe)) * 100
-                    pdf.set_xy(60 + bar_width + 5, y_pos + 10 + (i * 10))
-                    pdf.cell(40, 8, f"{count} ({percentage:.1f}%)", 0, 1)
-                
-                pdf.ln(chart_height + 10)
+                    # Custom format for priority column
+                    if 'urgent' in priority.lower():
+                        pdf.set_text_color(239, 68, 68)  # Red
+                    elif 'high' in priority.lower():
+                        pdf.set_text_color(245, 158, 11)  # Orange
+                    elif 'medium' in priority.lower():
+                        pdf.set_text_color(251, 191, 36)  # Yellow
+                    elif 'low' in priority.lower():
+                        pdf.set_text_color(16, 185, 129)  # Green
+                    
+                    pdf.cell(20, 7, priority[:10], 1, 0, 'L', row_color)
+                    pdf.set_text_color(0, 0, 0)  # Reset text color
+                    
+                    pdf.cell(15, 7, age[:10], 1, 0, 'L', row_color)
+                    pdf.cell(45, 7, company, 1, 0, 'L', row_color)
+                    pdf.cell(90, 7, summary, 1, 1, 'L', row_color)
+                    
+                    row_color = not row_color  # Alternate row color
+            else:
+                pdf.set_font('Arial', 'I', 10)
+                pdf.cell(0, 10, 'No tickets with "Done yet?" status found in the current dataset.', 0, 1, 'L')
             
-            # Also include tabular data below the chart
-            pdf.set_font('Arial', 'B', 12)
-            pdf.set_text_color(30, 58, 138)
-            pdf.cell(0, 10, 'Technician Details', 0, 1, 'L')
-            
-            # Create resource allocation table
-            pdf.set_fill_color(239, 246, 255)  # Light blue background
-            pdf.set_text_color(30, 58, 138)    # Dark blue text
-            pdf.set_font('Arial', 'B', 9)
-            pdf.cell(80, 7, 'Technician', 1, 0, 'C', 1)
-            pdf.cell(30, 7, 'Ticket Count', 1, 0, 'C', 1)
-            pdf.cell(30, 7, 'Percentage', 1, 1, 'C', 1)
-            
-            # Add resource data
-            pdf.set_font('Arial', '', 9)
-            pdf.set_text_color(0, 0, 0)
-            
-            total_tickets = len(dataframe)
-            row_color = False
-            
-            for resource, count in resource_counts.items():
-                resource_name = str(resource) if not pd.isna(resource) else "Unassigned"
-                percentage = (count / total_tickets) * 100
-                
-                # Alternate row colors
-                if row_color:
-                    pdf.set_fill_color(249, 250, 251)  # Light grey
-                else:
-                    pdf.set_fill_color(255, 255, 255)  # White
-                
-                pdf.cell(80, 7, resource_name[:40], 1, 0, 'L', row_color)
-                pdf.cell(30, 7, str(count), 1, 0, 'C', row_color)
-                pdf.cell(30, 7, f"{percentage:.1f}%", 1, 1, 'C', row_color)
-                
-                row_color = not row_color
+            pdf.ln(20)
         
         # No recommendations section as requested - page 3 removed
         
         # No contact information footer as requested
         
-        return pdf.output(dest='S').encode('latin1')
+        # Fix for byte array encoding issue
+        try:
+            # First attempt with latin1 encoding
+            return pdf.output(dest='S').encode('latin1')
+        except (UnicodeEncodeError, AttributeError):
+            # Fallback if the first method fails
+            byte_string = pdf.output(dest='S')
+            if isinstance(byte_string, str):
+                return byte_string.encode('latin1')
+            return byte_string
     
     # Simple PDF export section - no heading
     # Add some spacing
