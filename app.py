@@ -1098,7 +1098,8 @@ else:
         pdf.set_xy(175, pdf.get_y())
         pdf.cell(30, 8, f"Low: {priority_counts['Low']}", 0, 1)
         
-        pdf.ln(10)
+        # Add a clean page break between sections
+        pdf.add_page()
         
         # Add charts and visualizations from the dashboard
         
@@ -1153,95 +1154,8 @@ else:
         
         pdf.ln(60)
         
-        # 2. Ticket Priority Distribution - optimized for page space
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Ticket Priority Distribution', 0, 1, 'L')
-        
-        # Count tickets by priority
-        priority_counts = {
-            'Urgent': len(dataframe[dataframe['Priority'].str.contains('Urgent', case=False, na=False)]),
-            'High': len(dataframe[dataframe['Priority'].str.contains('High', case=False, na=False)]),
-            'Medium': len(dataframe[dataframe['Priority'].str.contains('Medium', case=False, na=False)]),
-            'Low': len(dataframe[dataframe['Priority'].str.contains('Low', case=False, na=False)])
-        }
-        
-        # Total count for percentage calculation
-        priority_total = sum(priority_counts.values())
-        
-        # Display priority counts in a compact row
-        pdf.set_font('Arial', 'B', 10)
-        
-        # Create a single row of priority boxes
-        x_position = 10
-        for priority, count in priority_counts.items():
-            percentage = (count / priority_total) * 100 if priority_total > 0 else 0
-            
-            # Set color based on priority
-            if priority == 'Urgent':
-                pdf.set_fill_color(239, 68, 68)  # Red
-            elif priority == 'High':
-                pdf.set_fill_color(245, 158, 11)  # Orange
-            elif priority == 'Medium':
-                pdf.set_fill_color(251, 191, 36)  # Yellow
-            elif priority == 'Low':
-                pdf.set_fill_color(16, 185, 129)  # Green
-            
-            # Draw colored box
-            pdf.rect(x_position, pdf.get_y(), 8, 8, 'F')
-            
-            # Add priority label and count
-            pdf.set_text_color(0, 0, 0)
-            pdf.set_xy(x_position + 10, pdf.get_y())
-            pdf.cell(45, 8, f"{priority}: {count}", 0, 0)
-            
-            # Move to the next position
-            x_position += 45
-        
-        pdf.ln(15)
-        
-        # Visual representation of priority distribution - more compact
-        pdf.set_font('Arial', '', 10)
-        
-        priority_colors = {
-            'Urgent': (239, 68, 68),    # Red
-            'High': (245, 158, 11),     # Orange
-            'Medium': (251, 191, 36),   # Yellow
-            'Low': (16, 185, 129)       # Green
-        }
-        
-        # Draw inside box for priority distribution - single chart
-        pdf.rect(10, pdf.get_y(), 190, 50, 'D')
-        
-        # Order by priority level (not alphabetical)
-        priority_order = ['Urgent', 'High', 'Medium', 'Low']
-        
-        # Calculate total width available
-        available_width = 180
-        start_x = 15
-        
-        # Draw each priority bar with nested approach
-        y_pos = pdf.get_y() + 5
-        for i, priority in enumerate(priority_order):
-            count = priority_counts[priority]
-            percentage = (count / priority_total) * 100 if priority_total > 0 else 0
-            # Fixed bar width to maintain the scaling
-            bar_width = int(available_width * (percentage / 100))
-            
-            if bar_width < 5 and count > 0:
-                bar_width = 5  # Minimum visible size
-            
-            # Set priority color
-            pdf.set_fill_color(*priority_colors[priority])
-            
-            # Draw horizontal bar
-            if bar_width > 0:
-                pdf.rect(start_x, y_pos + (i * 10), bar_width, 8, 'F')
-            
-            # Add priority label to left of bar
-            pdf.set_text_color(0, 0, 0)
-            pdf.set_xy(start_x, y_pos + (i * 10))
-            pdf.cell(available_width, 8, f"{priority}: {count} ({percentage:.1f}%)", 0, 1)
+        # NOTE: Priority Distribution already shown on first page
+        # Skip the duplicate section and move directly to the next visualization
         
         pdf.ln(70)
         
