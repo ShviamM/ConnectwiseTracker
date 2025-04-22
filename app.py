@@ -1240,46 +1240,19 @@ else:
         
         return pdf.output(dest='S').encode('latin1')
     
-    # Download section with customizable branding
+    # Simple PDF export section
     st.markdown("<h2 class='subheader'>Export Options</h2>", unsafe_allow_html=True)
     
-    # Create two columns - one for settings, one for download
-    brand_col, download_col = st.columns([3, 2])
+    # Fixed default values
+    company_name = "COMPANY"
+    rgb_color = (41, 128, 185)  # Default blue
+    logo_size = 20  # Fixed logo size as requested
+    include_timestamp = True
     
-    with brand_col:
-        st.markdown("<h4>Customize Report Branding</h4>", unsafe_allow_html=True)
-        
-        # Company name customization
-        company_name = st.text_input("Company Name for Report", "COMPANY", 
-                                    help="This name will appear in the report header")
-        
-        # Color customization for branding
-        brand_color = st.color_picker("Brand Color", "#2980b9", 
-                                    help="Select your brand color for the report")
-        
-        # Logo size option
-        logo_size = st.slider("Logo Size", min_value=20, max_value=60, value=40, 
-                            help="Adjust the size of your logo in the report")
-        
-        # Include timestamp option
-        include_timestamp = st.checkbox("Include Timestamp", value=True,
-                                       help="Add generation timestamp to report")
+    # Center download button
+    col1, col2, col3 = st.columns([1, 2, 1])
     
-    with download_col:
-        st.markdown("<h4>Download Options</h4>", unsafe_allow_html=True)
-        
-        # Add some space
-        st.write("")
-        st.write("")
-        
-        # Convert hex color to RGB tuple
-        def hex_to_rgb(hex_color):
-            hex_color = hex_color.lstrip('#')
-            return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-        
-        # Generate PDF report with custom branding
-        rgb_color = hex_to_rgb(brand_color)
-        
+    with col2:
         try:
             pdf_data = create_pdf(filtered_df, company_name, rgb_color, logo_size, include_timestamp)
             st.download_button(
@@ -1290,10 +1263,6 @@ else:
                 help="Download a comprehensive PDF report with executive summary and detailed ticket metrics",
                 key="pdf_download"
             )
-            
-            # Add a preview message
-            st.success("Your PDF will include custom branding!")
-            
         except Exception as e:
             st.error(f"Error generating PDF: {str(e)}")
             st.info("PDF generation requires additional configuration.")
