@@ -1153,7 +1153,7 @@ else:
         
         pdf.ln(60)
         
-        # 2. Ticket Priority Distribution
+        # 2. Ticket Priority Distribution - optimized for page space
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Ticket Priority Distribution', 0, 1, 'L')
@@ -1169,7 +1169,38 @@ else:
         # Total count for percentage calculation
         priority_total = sum(priority_counts.values())
         
-        # Create colored boxes and percentage bars for priorities
+        # Display priority counts in a compact row
+        pdf.set_font('Arial', 'B', 10)
+        
+        # Create a single row of priority boxes
+        x_position = 10
+        for priority, count in priority_counts.items():
+            percentage = (count / priority_total) * 100 if priority_total > 0 else 0
+            
+            # Set color based on priority
+            if priority == 'Urgent':
+                pdf.set_fill_color(239, 68, 68)  # Red
+            elif priority == 'High':
+                pdf.set_fill_color(245, 158, 11)  # Orange
+            elif priority == 'Medium':
+                pdf.set_fill_color(251, 191, 36)  # Yellow
+            elif priority == 'Low':
+                pdf.set_fill_color(16, 185, 129)  # Green
+            
+            # Draw colored box
+            pdf.rect(x_position, pdf.get_y(), 8, 8, 'F')
+            
+            # Add priority label and count
+            pdf.set_text_color(0, 0, 0)
+            pdf.set_xy(x_position + 10, pdf.get_y())
+            pdf.cell(45, 8, f"{priority}: {count}", 0, 0)
+            
+            # Move to the next position
+            x_position += 45
+        
+        pdf.ln(15)
+        
+        # Visual representation of priority distribution - more compact
         pdf.set_font('Arial', '', 10)
         
         priority_colors = {
@@ -1179,39 +1210,42 @@ else:
             'Low': (16, 185, 129)       # Green
         }
         
-        # Draw priority distribution as horizontal bars
+        # Draw inside box for priority distribution - single chart
+        pdf.rect(10, pdf.get_y(), 190, 50, 'D')
+        
+        # Order by priority level (not alphabetical)
+        priority_order = ['Urgent', 'High', 'Medium', 'Low']
+        
+        # Calculate total width available
+        available_width = 180
+        start_x = 15
+        
+        # Draw each priority bar with nested approach
         y_pos = pdf.get_y() + 5
-        
-        # Draw border around the chart
-        pdf.rect(10, y_pos, 190, 55, 'D')
-        
-        # Draw each priority bar with label and percentage
-        for i, (priority, count) in enumerate(priority_counts.items()):
+        for i, priority in enumerate(priority_order):
+            count = priority_counts[priority]
             percentage = (count / priority_total) * 100 if priority_total > 0 else 0
-            bar_width = min(150 * (percentage / 100), 150)  # Limit to max width
+            # Fixed bar width to maintain the scaling
+            bar_width = int(available_width * (percentage / 100))
+            
+            if bar_width < 5 and count > 0:
+                bar_width = 5  # Minimum visible size
             
             # Set priority color
             pdf.set_fill_color(*priority_colors[priority])
             
-            # Draw colored rectangle for the priority
-            pdf.rect(20, y_pos + 10 + (i * 10), 10, 8, 'F')
+            # Draw horizontal bar
+            if bar_width > 0:
+                pdf.rect(start_x, y_pos + (i * 10), bar_width, 8, 'F')
             
-            # Draw percentage bar
-            pdf.rect(60, y_pos + 10 + (i * 10), bar_width, 8, 'F')
-            
-            # Add priority label and count
+            # Add priority label to left of bar
             pdf.set_text_color(0, 0, 0)
-            pdf.set_xy(32, y_pos + 10 + (i * 10))
-            pdf.cell(25, 8, f"{priority}:", 0, 0)
-            
-            # Add count and percentage to the right of the bar
-            pdf.set_xy(60 + bar_width + 5, y_pos + 10 + (i * 10))
-            pdf.cell(40, 8, f"{count} ({percentage:.1f}%)", 0, 1)
+            pdf.set_xy(start_x, y_pos + (i * 10))
+            pdf.cell(available_width, 8, f"{priority}: {count} ({percentage:.1f}%)", 0, 1)
         
         pdf.ln(70)
         
-        # 3. Tickets by Company (Top 10)
-        pdf.add_page()
+        # 3. Tickets by Company (Top 10) - on same page to avoid page breaks
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Tickets by Company (Top 10)', 0, 1, 'L')
