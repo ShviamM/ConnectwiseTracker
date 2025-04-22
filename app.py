@@ -1240,8 +1240,9 @@ else:
         
         return pdf.output(dest='S').encode('latin1')
     
-    # Simple PDF export section
-    st.markdown("<h2 class='subheader'>Export Options</h2>", unsafe_allow_html=True)
+    # Simple PDF export section - no heading
+    # Add some spacing
+    st.write("")
     
     # Fixed default values
     company_name = "COMPANY"
@@ -1249,12 +1250,27 @@ else:
     logo_size = 20  # Fixed logo size as requested
     include_timestamp = True
     
-    # Center download button
-    col1, col2, col3 = st.columns([1, 2, 1])
+    # Center download button with wider margins
+    col1, col2, col3 = st.columns([2, 3, 2])
     
     with col2:
         try:
             pdf_data = create_pdf(filtered_df, company_name, rgb_color, logo_size, include_timestamp)
+            
+            # Add custom styling to center the button
+            st.markdown(
+                """
+                <style>
+                div.stDownloadButton > button {
+                    width: 100%;
+                    text-align: center;
+                    font-weight: bold;
+                }
+                </style>
+                """, 
+                unsafe_allow_html=True
+            )
+            
             st.download_button(
                 label="🔽 Download Executive Report (PDF)",
                 data=pdf_data,
