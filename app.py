@@ -303,15 +303,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Current date/time indicator for dashboard freshness
-current_time = datetime.now().strftime("%B %d, %Y %I:%M %p")
-st.markdown(f"""
-<div style='text-align: center; margin-bottom: 30px;'>
-    <span style='background-color: #EFF6FF; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #1E3A8A;'>
-        <strong>Dashboard Updated:</strong> {current_time}
-    </span>
-</div>
-""", unsafe_allow_html=True)
+# No dashboard timestamp as requested
 
 # Sidebar for file upload and filters
 with st.sidebar:
@@ -464,61 +456,214 @@ else:
     # Create processed data for visualization
     processed_data = process_data(filtered_df, time_period.lower())
     
-    # Display summary metrics with enhanced styling
+    # Display summary metrics with enhanced eye-catching styling
     st.markdown("<h2 class='subheader'>Summary Metrics</h2>", unsafe_allow_html=True)
     
-    # Create a metrics container with custom styling
-    st.markdown("<div class='metric-container'>", unsafe_allow_html=True)
-    col1, col2, col3, col4 = st.columns(4)
+    # Custom CSS for more eye-catching metrics cards
+    st.markdown("""
+    <style>
+        /* Enhanced metrics styling with gradient backgrounds and animations */
+        .metrics-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+        
+        .metric-total {
+            background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+        }
+        
+        .metric-total::before {
+            background: linear-gradient(90deg, #3B82F6, #1E40AF);
+        }
+        
+        .metric-age {
+            background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+        }
+        
+        .metric-age::before {
+            background: linear-gradient(90deg, #10B981, #047857);
+        }
+        
+        .metric-unassigned {
+            background: linear-gradient(135deg, #FEF2F2, #FEE2E2);
+        }
+        
+        .metric-unassigned::before {
+            background: linear-gradient(90deg, #EF4444, #B91C1C);
+        }
+        
+        .metric-sla {
+            background: linear-gradient(135deg, #FFF7ED, #FFEDD5);
+        }
+        
+        .metric-sla::before {
+            background: linear-gradient(90deg, #F97316, #C2410C);
+        }
+        
+        .metric-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 30px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .metric-total .metric-value {
+            color: #1E40AF;
+        }
+        
+        .metric-age .metric-value {
+            color: #047857;
+        }
+        
+        .metric-unassigned .metric-value {
+            color: #B91C1C;
+        }
+        
+        .metric-sla .metric-value {
+            color: #C2410C;
+        }
+        
+        .metric-delta {
+            font-size: 14px;
+            font-weight: 500;
+            padding: 3px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .delta-positive {
+            background-color: #ECFDF5;
+            color: #047857;
+        }
+        
+        .delta-negative {
+            background-color: #FEF2F2;
+            color: #B91C1C;
+        }
+        
+        .metric-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            opacity: 0.2;
+            font-size: 28px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
     
-    with col1:
-        st.metric(
-            label="Total Tickets", 
-            value=len(filtered_df)
-        )
+    # Get the metrics values
+    total_tickets = len(filtered_df)
     
-    with col2:
-        # Average age of tickets
-        if 'Age' in filtered_df.columns:
-            try:
-                # Extract numeric value from Age column
-                filtered_df.loc[:, 'Age_Numeric'] = filtered_df['Age'].astype(str).str.extract(r'(\d+\.?\d*)').astype(float)
-                avg_age = filtered_df['Age_Numeric'].mean()
-                st.metric(
-                    label="Average Age (Days)", 
-                    value=f"{avg_age:.1f}"
-                )
-            except:
-                st.metric(label="Average Age (Days)", value="N/A")
-        else:
-            st.metric(label="Average Age (Days)", value="N/A")
+    # Average age of tickets
+    avg_age = "N/A"
+    if 'Age' in filtered_df.columns:
+        try:
+            # Extract numeric value from Age column
+            filtered_df.loc[:, 'Age_Numeric'] = filtered_df['Age'].astype(str).str.extract(r'(\d+\.?\d*)').astype(float)
+            avg_age = f"{filtered_df['Age_Numeric'].mean():.1f}"
+        except:
+            pass
     
-    with col3:
-        # Tickets without assigned resources
-        if 'Resources' in filtered_df.columns:
-            unassigned = filtered_df[filtered_df['Resources'].isna() | (filtered_df['Resources'] == '')].shape[0]
-            st.metric(
-                label="Unassigned Tickets", 
-                value=unassigned,
-                delta=f"{unassigned/len(filtered_df)*100:.1f}%" if len(filtered_df) > 0 else "0%"
-            )
-        else:
-            st.metric(label="Unassigned Tickets", value="N/A")
+    # Unassigned tickets
+    unassigned = 0
+    unassigned_pct = "0%"
+    if 'Resources' in filtered_df.columns:
+        unassigned = filtered_df[filtered_df['Resources'].isna() | (filtered_df['Resources'] == '')].shape[0]
+        if len(filtered_df) > 0:
+            unassigned_pct = f"{unassigned/len(filtered_df)*100:.1f}%"
     
-    with col4:
-        # SLA compliance
-        if 'SLA Status' in filtered_df.columns:
-            overdue = filtered_df[filtered_df['SLA Status'].str.contains('late|overdue', case=False, na=False)].shape[0]
-            st.metric(
-                label="SLA Issues", 
-                value=overdue,
-                delta=f"{overdue/len(filtered_df)*100:.1f}%" if len(filtered_df) > 0 else "0%",
-                delta_color="inverse"
-            )
-        else:
-            st.metric(label="SLA Issues", value="N/A")
+    # SLA issues
+    overdue = 0
+    overdue_pct = "0%"
+    if 'SLA Status' in filtered_df.columns:
+        overdue = filtered_df[filtered_df['SLA Status'].str.contains('late|overdue', case=False, na=False)].shape[0]
+        if len(filtered_df) > 0:
+            overdue_pct = f"{overdue/len(filtered_df)*100:.1f}%"
     
-    st.markdown("</div>", unsafe_allow_html=True)
+    # Render the custom HTML metrics
+    st.markdown(f"""
+    <div class="metrics-container">
+        <div class="metric-card metric-total">
+            <div class="metric-icon">📊</div>
+            <div class="metric-label">Total Tickets</div>
+            <div class="metric-value">{total_tickets}</div>
+            <div>Active ticket count</div>
+        </div>
+        
+        <div class="metric-card metric-age">
+            <div class="metric-icon">⏱️</div>
+            <div class="metric-label">Average Age</div>
+            <div class="metric-value">{avg_age}</div>
+            <div>Days in system</div>
+        </div>
+        
+        <div class="metric-card metric-unassigned">
+            <div class="metric-icon">👤</div>
+            <div class="metric-label">Unassigned Tickets</div>
+            <div class="metric-value">{unassigned}</div>
+            <div class="metric-delta delta-negative">{unassigned_pct} of total</div>
+        </div>
+        
+        <div class="metric-card metric-sla">
+            <div class="metric-icon">⚠️</div>
+            <div class="metric-label">SLA Issues</div>
+            <div class="metric-value">{overdue}</div>
+            <div class="metric-delta delta-negative">{overdue_pct} of total</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Keep the standard metrics but hidden (for compatibility with the rest of the app)
+    with st.container():
+        st.markdown("<div style='display:none'>", unsafe_allow_html=True)
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            st.metric(label="Total Tickets", value=total_tickets)
+        
+        with col2:
+            st.metric(label="Average Age (Days)", value=avg_age)
+        
+        with col3:
+            st.metric(label="Unassigned Tickets", value=unassigned)
+        
+        with col4:
+            st.metric(label="SLA Issues", value=overdue)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
     
     # Visualization section with enhanced styling
     st.markdown("<h2 class='subheader'>Ticket Analytics</h2>", unsafe_allow_html=True)
@@ -987,66 +1132,7 @@ else:
                 pdf.cell(30, 7, str(count), 1, 0, 'C')
                 pdf.cell(30, 7, f"{percentage:.1f}%", 1, 1, 'C')
         
-        # Add recommendations section
-        pdf.add_page()
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Recommendations & Next Steps', 0, 1, 'L')
-        
-        # Add decorative line
-        pdf.set_draw_color(59, 130, 246)  # Blue line
-        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-        pdf.ln(5)
-        
-        # Generate some basic recommendations based on the data
-        pdf.set_font('Arial', '', 10)
-        pdf.set_text_color(0, 0, 0)
-        
-        # Count tickets by age groups
-        if 'Age_Numeric' in dataframe.columns:
-            old_tickets = len(dataframe[dataframe['Age_Numeric'] > 30])
-            new_tickets = len(dataframe[dataframe['Age_Numeric'] <= 7])
-            urgent_tickets = len(dataframe[dataframe['Priority'].str.contains('Urgent', case=False, na=False)])
-            
-            # Add styled recommendations
-            pdf.set_font('Arial', 'B', 10)
-            pdf.set_text_color(30, 64, 175)  # Indigo
-            pdf.cell(0, 7, '1. Aging Ticket Management:', 0, 1)
-            pdf.set_font('Arial', '', 10)
-            pdf.set_text_color(0, 0, 0)
-            pdf.multi_cell(0, 5, f'There are {old_tickets} tickets that have been open for more than 30 days. Consider reviewing these tickets and either escalating priority or assigning additional resources to clear this backlog.')
-            pdf.ln(3)
-            
-            pdf.set_font('Arial', 'B', 10)
-            pdf.set_text_color(30, 64, 175)  # Indigo
-            pdf.cell(0, 7, '2. Critical Alert Response:', 0, 1)
-            pdf.set_font('Arial', '', 10)
-            pdf.set_text_color(0, 0, 0)
-            pdf.multi_cell(0, 5, f'With {urgent_tickets} urgent tickets in the system, consider implementing a dedicated rapid response team that can address critical security alerts within 4 hours of reporting.')
-            pdf.ln(3)
-            
-            pdf.set_font('Arial', 'B', 10)
-            pdf.set_text_color(30, 64, 175)  # Indigo
-            pdf.cell(0, 7, '3. Workload Distribution:', 0, 1)
-            pdf.set_font('Arial', '', 10)
-            pdf.set_text_color(0, 0, 0)
-            pdf.multi_cell(0, 5, 'Review resource allocation to ensure balanced workloads. Consider reassigning tickets from heavily loaded technicians to those with capacity to improve response times.')
-            pdf.ln(3)
-            
-            pdf.set_font('Arial', 'B', 10)
-            pdf.set_text_color(30, 64, 175)  # Indigo
-            pdf.cell(0, 7, '4. Recent Ticket Analysis:', 0, 1)
-            pdf.set_font('Arial', '', 10)
-            pdf.set_text_color(0, 0, 0)
-            pdf.multi_cell(0, 5, f'There are {new_tickets} tickets created in the past week. Monitor this trend to determine if additional resources are needed to handle increasing security incidents.')
-            pdf.ln(3)
-            
-            pdf.set_font('Arial', 'B', 10)
-            pdf.set_text_color(30, 64, 175)  # Indigo
-            pdf.cell(0, 7, '5. Proactive Security Measures:', 0, 1)
-            pdf.set_font('Arial', '', 10)
-            pdf.set_text_color(0, 0, 0)
-            pdf.multi_cell(0, 5, 'Consider implementing automated alerting and response protocols for common security issues to reduce manual ticket creation and response time.')
+        # No recommendations section as requested - page 3 removed
         
         # Add footer with contact information
         pdf.set_y(-40)
@@ -1058,42 +1144,14 @@ else:
         
         return pdf.output(dest='S').encode('latin1')
     
-    # Enhanced PDF download section with better styling and visual cues
-    st.markdown("<h2 class='subheader'>Executive Reporting</h2>", unsafe_allow_html=True)
-    
-    # Create an eye-catching container for the PDF download
-    st.markdown("""
-    <div style="background: linear-gradient(to right, #EEF2FF, #E0E7FF); 
-                border-radius: 10px; 
-                padding: 20px; 
-                margin: 20px 0; 
-                border-left: 5px solid #4F46E5;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-        <h3 style="color: #312E81; margin-top: 0;">Executive Security Report</h3>
-        <p style="color: #4B5563;">
-            Generate a comprehensive PDF report containing:
-            <ul style="margin-bottom: 15px;">
-                <li>Executive summary with key metrics</li>
-                <li>Priority distribution with visual indicators</li>
-                <li>Top 10 oldest tickets requiring attention</li>
-                <li>Critical security alerts requiring immediate action</li>
-                <li>Resource allocation analysis</li>
-                <li>Recommendations based on current data trends</li>
-            </ul>
-        </p>
-        <p style="color: #4B5563; font-style: italic; font-size: 0.9em;">
-            Perfect for management reviews and operational meetings. The report includes all data from your selected time period.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
+    # Simple PDF download button without the explanatory section
     col1, col2, col3 = st.columns([1, 2, 1])
     
     with col2:
         try:
             pdf_data = create_pdf(filtered_df)
             st.download_button(
-                label="📊 Download Executive Security Report (PDF)",
+                label="📊 Download Security Report (PDF)",
                 data=pdf_data,
                 file_name=f"NOC_Security_Report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
                 mime="application/pdf",
