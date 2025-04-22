@@ -1166,9 +1166,10 @@ else:
         
         pdf.ln(60)
         
-        # Add Daily Security Update section
-        pdf.ln(20)
+        # NEW PAGE LAYOUT - Move Daily Security Update and Top 5 By Company to same page
+        pdf.add_page()
         
+        # Add Daily Security Update section
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Daily Security Update', 0, 1, 'L')
@@ -1261,7 +1262,7 @@ else:
         
         pdf.ln(min(130, 15 + (len(company_counts) * 10)))
         
-        # 4. Top 10 oldest tickets section
+        # 4. Top 10 oldest tickets section - Now with Resources column
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 10 Oldest Tickets', 0, 1, 'L')
@@ -1273,12 +1274,13 @@ else:
             pdf.set_fill_color(239, 246, 255)  # Light blue background
             pdf.set_text_color(30, 58, 138)    # Dark blue text
             pdf.set_font('Arial', 'B', 9)
-            pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
-            pdf.cell(20, 7, 'Priority', 1, 0, 'C', 1)
-            pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
-            pdf.cell(25, 7, 'Status', 1, 0, 'C', 1)
-            pdf.cell(30, 7, 'Company', 1, 0, 'C', 1)
-            pdf.cell(80, 7, 'Summary', 1, 1, 'C', 1)
+            pdf.cell(18, 7, 'Ticket #', 1, 0, 'C', 1)
+            pdf.cell(18, 7, 'Priority', 1, 0, 'C', 1)
+            pdf.cell(12, 7, 'Age', 1, 0, 'C', 1)
+            pdf.cell(20, 7, 'Status', 1, 0, 'C', 1)
+            pdf.cell(25, 7, 'Company', 1, 0, 'C', 1)
+            pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
+            pdf.cell(72, 7, 'Summary', 1, 1, 'C', 1)
             
             # Add table data
             pdf.set_font('Arial', '', 8)
@@ -1294,13 +1296,16 @@ else:
                 age = str(row.get('Age', 'N/A'))
                 status = str(row.get('Status', 'N/A'))
                 company = str(row.get('Company', 'N/A'))
+                resource = str(row.get('Resources', 'N/A'))
                 summary = str(row.get('Summary Description', 'N/A'))
                 
                 # Truncate long fields
-                if len(summary) > 45:
-                    summary = summary[:42] + '...'
-                if len(company) > 15:
-                    company = company[:12] + '...'
+                if len(summary) > 40:
+                    summary = summary[:37] + '...'
+                if len(company) > 12:
+                    company = company[:9] + '...'
+                if len(resource) > 12:
+                    resource = resource[:9] + '...'
                 
                 # Set fill color for alternating rows
                 if row_color:
@@ -1309,7 +1314,7 @@ else:
                     pdf.set_fill_color(255, 255, 255)  # White
                 
                 # Set priority cell color based on level
-                pdf.cell(20, 7, ticket_num[:10], 1, 0, 'L', row_color)
+                pdf.cell(18, 7, ticket_num[:9], 1, 0, 'L', row_color)
                 
                 # Custom format for priority column
                 if 'urgent' in priority.lower():
@@ -1321,13 +1326,14 @@ else:
                 elif 'low' in priority.lower():
                     pdf.set_text_color(16, 185, 129)  # Green
                 
-                pdf.cell(20, 7, priority[:10], 1, 0, 'L', row_color)
+                pdf.cell(18, 7, priority[:9], 1, 0, 'L', row_color)
                 pdf.set_text_color(0, 0, 0)  # Reset text color
                 
-                pdf.cell(15, 7, age[:10], 1, 0, 'L', row_color)
-                pdf.cell(25, 7, status[:15], 1, 0, 'L', row_color)
-                pdf.cell(30, 7, company, 1, 0, 'L', row_color)
-                pdf.cell(80, 7, summary, 1, 1, 'L', row_color)
+                pdf.cell(12, 7, age[:9], 1, 0, 'L', row_color)
+                pdf.cell(20, 7, status[:12], 1, 0, 'L', row_color)
+                pdf.cell(25, 7, company, 1, 0, 'L', row_color)
+                pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
+                pdf.cell(72, 7, summary, 1, 1, 'L', row_color)
                 
                 row_color = not row_color  # Alternate row color
         
@@ -1410,11 +1416,11 @@ else:
                 pdf.set_font('Arial', 'I', 10)
                 pdf.cell(0, 10, 'No critical security alerts detected in the current dataset.', 0, 1, 'L')
         
-        # Add Top of Done Yets table
+        # Add Top of Done Yets table including Resources column
         pdf.add_page()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Top of Done Yets', 0, 1, 'L')
+        pdf.cell(0, 10, 'Top Done Yets', 0, 1, 'L')
         
         # Add descriptive text for Done Yets table
         pdf.set_font('Arial', '', 10)
@@ -1431,11 +1437,12 @@ else:
                 pdf.set_fill_color(239, 246, 255)  # Light blue background
                 pdf.set_text_color(30, 58, 138)    # Dark blue text
                 pdf.set_font('Arial', 'B', 9)
-                pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
-                pdf.cell(20, 7, 'Priority', 1, 0, 'C', 1)
-                pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
-                pdf.cell(45, 7, 'Company', 1, 0, 'C', 1)
-                pdf.cell(90, 7, 'Summary', 1, 1, 'C', 1)
+                pdf.cell(18, 7, 'Ticket #', 1, 0, 'C', 1)
+                pdf.cell(18, 7, 'Priority', 1, 0, 'C', 1)
+                pdf.cell(12, 7, 'Age', 1, 0, 'C', 1)
+                pdf.cell(25, 7, 'Company', 1, 0, 'C', 1)
+                pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
+                pdf.cell(92, 7, 'Summary', 1, 1, 'C', 1)
                 
                 # Add table data
                 pdf.set_font('Arial', '', 8)
@@ -1450,13 +1457,16 @@ else:
                     priority = str(row.get('Priority', 'N/A'))
                     age = str(row.get('Age', 'N/A')) if 'Age' in row else 'N/A'
                     company = str(row.get('Company', 'N/A'))
+                    resource = str(row.get('Resources', 'N/A'))
                     summary = str(row.get('Summary Description', 'N/A'))
                     
                     # Truncate long fields
-                    if len(summary) > 50:
-                        summary = summary[:47] + '...'
-                    if len(company) > 25:
-                        company = company[:22] + '...'
+                    if len(summary) > 45:
+                        summary = summary[:42] + '...'
+                    if len(company) > 12:
+                        company = company[:9] + '...'
+                    if len(resource) > 12:
+                        resource = resource[:9] + '...'
                     
                     # Set fill color for alternating rows
                     if row_color:
@@ -1465,7 +1475,7 @@ else:
                         pdf.set_fill_color(255, 255, 255)  # White
                     
                     # Add data cells
-                    pdf.cell(20, 7, ticket_num[:10], 1, 0, 'L', row_color)
+                    pdf.cell(18, 7, ticket_num[:9], 1, 0, 'L', row_color)
                     
                     # Custom format for priority column
                     if 'urgent' in priority.lower():
@@ -1477,12 +1487,13 @@ else:
                     elif 'low' in priority.lower():
                         pdf.set_text_color(16, 185, 129)  # Green
                     
-                    pdf.cell(20, 7, priority[:10], 1, 0, 'L', row_color)
+                    pdf.cell(18, 7, priority[:9], 1, 0, 'L', row_color)
                     pdf.set_text_color(0, 0, 0)  # Reset text color
                     
-                    pdf.cell(15, 7, age[:10], 1, 0, 'L', row_color)
-                    pdf.cell(45, 7, company, 1, 0, 'L', row_color)
-                    pdf.cell(90, 7, summary, 1, 1, 'L', row_color)
+                    pdf.cell(12, 7, age[:9], 1, 0, 'L', row_color)
+                    pdf.cell(25, 7, company, 1, 0, 'L', row_color)
+                    pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
+                    pdf.cell(92, 7, summary, 1, 1, 'L', row_color)
                     
                     row_color = not row_color  # Alternate row color
             else:
