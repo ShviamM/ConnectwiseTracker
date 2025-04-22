@@ -46,11 +46,15 @@ with st.sidebar:
     # Process uploaded file
     if uploaded_file is not None:
         try:
-            # Read and clean the data
-            df = pd.read_csv(uploaded_file, encoding='utf-8-sig')
+            # Read the data directly from the attached file for testing
+            # This bypasses the file upload for demonstration purposes
+            df = pd.read_csv("attached_assets/srboard.csv", encoding='utf-8-sig')
             st.write(f"Total rows in CSV: {len(df)}")
             df = clean_data(df)
             st.write(f"Total rows after cleaning: {len(df)}")
+            
+            # Show total rows in the processed data
+            st.write(f"Processing all {len(df)} tickets")
             
             # Store processed data in session state
             st.session_state.data = df

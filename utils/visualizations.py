@@ -199,22 +199,25 @@ def create_ticket_trend_chart(df, time_period='daily'):
     if 'Last Update' not in df.columns:
         return go.Figure()
     
+    # Make a copy of the dataframe to avoid SettingWithCopyWarning
+    df_trend = df.copy()
+    
     # Ensure Last Update is datetime
-    df['Last Update'] = pd.to_datetime(df['Last Update'], errors='coerce')
+    df_trend.loc[:, 'Last Update'] = pd.to_datetime(df_trend['Last Update'], errors='coerce')
     
     # Group by appropriate time period
     if time_period == 'daily':
-        df['time_group'] = df['Last Update'].dt.date
+        df_trend.loc[:, 'time_group'] = df_trend['Last Update'].dt.date
         x_title = 'Date'
     elif time_period == 'weekly':
-        df['time_group'] = df['Last Update'].dt.to_period('W').astype(str)
+        df_trend.loc[:, 'time_group'] = df_trend['Last Update'].dt.to_period('W').astype(str)
         x_title = 'Week'
     elif time_period == 'monthly':
-        df['time_group'] = df['Last Update'].dt.to_period('M').astype(str)
+        df_trend.loc[:, 'time_group'] = df_trend['Last Update'].dt.to_period('M').astype(str)
         x_title = 'Month'
     
     # Count tickets by time period
-    ticket_counts = df.groupby('time_group').size().reset_index(name='Count')
+    ticket_counts = df_trend.groupby('time_group').size().reset_index(name='Count')
     
     # Convert time_group to string for plotting
     ticket_counts['time_group'] = ticket_counts['time_group'].astype(str)
