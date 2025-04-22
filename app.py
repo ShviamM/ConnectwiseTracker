@@ -1134,8 +1134,8 @@ else:
             # Default color if status not in map
             default_color = (107, 114, 128)  # Gray
             
-            # Improved compact layout for status bars
-            max_status_len = max([len(s) for s in status_counts.keys()]) if status_counts.keys() else 0
+            # Improved compact layout for status bars - with proper check for empty collection
+            max_status_len = max([len(s) for s in status_counts.keys()]) if len(status_counts) > 0 else 0
             
             # Draw visual bars for each status - max 8 per page
             for i, (status, count) in enumerate(status_counts.items()):
@@ -1501,4 +1501,8 @@ else:
             )
         except Exception as e:
             st.error(f"Error generating PDF: {str(e)}")
-            st.info("PDF generation requires additional configuration.")
+            
+            # Add more detailed error info for debugging
+            import traceback
+            st.error(f"Error details: {traceback.format_exc()}")
+            st.info("There was an issue with the PDF generation. Please try again.")
