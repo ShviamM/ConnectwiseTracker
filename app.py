@@ -1164,54 +1164,73 @@ else:
                     pdf.set_xy(x_start + bar_width + 5, y_start + (i * 10))
                     pdf.cell(70, 7, f"{display_status}: {count} ({percentage:.1f}%)", 0, 1)
         
-        pdf.ln(60)
+        # Add the new Table Format for Status Distribution on first page
+        pdf.ln(20)
         
-        # NEW PAGE LAYOUT - Move Daily Security Update and Top 5 By Company to same page
-        pdf.add_page()
-        
-        # Add Daily Security Update section
+        # Status table header
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Daily Security Update', 0, 1, 'L')
+        pdf.cell(0, 10, 'Ticket Status Distribution', 0, 1, 'L')
         
-        # Add current date for the security update
-        today_date = datetime.now().strftime("%B %d, %Y")
-        pdf.set_font('Arial', 'I', 10)
-        pdf.set_text_color(107, 114, 128)  # Gray text
-        pdf.cell(0, 8, f"Report for: {today_date}", 0, 1, 'L')
-        
-        # Create fancy box for security update
-        pdf.set_fill_color(239, 246, 255)  # Light blue background
-        pdf.set_draw_color(199, 210, 254)  # Border color
-        pdf.rect(10, pdf.get_y(), 190, 30, 'DF')
-        
-        # Add summary text for daily update
-        pdf.set_font('Arial', '', 10)
-        pdf.set_text_color(0, 0, 0)
-        pdf.set_xy(15, pdf.get_y() + 5)
-        
-        # Calculate metrics for daily update
-        today_tickets = 0
-        high_priority_today = 0
-        
-        if 'Last Update' in dataframe.columns:
-            today = datetime.now().date()
-            today_mask = pd.to_datetime(dataframe['Last Update']).dt.date == today
-            today_tickets = len(dataframe[today_mask])
+        if 'Status' in dataframe.columns:
+            # Calculate status counts and percentages
+            status_counts = dataframe['Status'].value_counts()
+            total_tickets = len(dataframe)
             
-            if 'Priority' in dataframe.columns:
-                high_priority_mask = dataframe['Priority'].str.contains('Urgent|High', case=False, na=False)
-                high_priority_today = len(dataframe[today_mask & high_priority_mask])
+            # Status emoji mapping
+            status_emojis = {
+                'Ready to Schedule': '🟦',
+                'Waiting on Parts': '🟧',
+                'Working Ticket Now': '🟫',
+                'Waiting on Client': '🟨',
+                'Scheduled Remote': '🟪',
+                'Done yet?': '🟩',
+                'Client Updated': '🟦', 
+                'Manager Review': '🟥',
+                'Awaiting Client Update': '🟦'
+            }
+            
+            # Create header row for table
+            pdf.set_font('Arial', 'B', 11)
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.set_text_color(30, 58, 138)    # Dark blue text
+            pdf.cell(100, 7, 'Status', 1, 0, 'L', 1)
+            pdf.cell(80, 7, 'Count (%)', 1, 1, 'L', 1)
+            
+            # Add table data with alternating rows
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
+            row_color = False
+            
+            for status, count in status_counts.items():
+                percentage = (count / total_tickets) * 100
+                
+                # Find matching emoji for status
+                emoji = '•'
+                for status_key, status_emoji in status_emojis.items():
+                    if status_key.lower() in status.lower():
+                        emoji = status_emoji
+                        break
+                
+                # Format status with emoji
+                display_status = f"{emoji} {status}"
+                
+                # Set alternating row colors
+                if row_color:
+                    pdf.set_fill_color(245, 247, 250)  # Very light grey
+                else:
+                    pdf.set_fill_color(255, 255, 255)  # White
+                
+                # Add row to table
+                pdf.cell(100, 7, display_status[:40], 1, 0, 'L', row_color)
+                pdf.cell(80, 7, f"{count} ({percentage:.1f}%)", 1, 1, 'L', row_color)
+                
+                row_color = not row_color
         
-        pdf.multi_cell(180, 5, 
-            f"Today's Security Activities: {today_tickets} new tickets processed, " +
-            f"{high_priority_today} high-priority items addressed. " +
-            f"Current focus is on resolving critical alerts and reducing SLA breaches."
-        )
+        pdf.ln(10)
         
-        pdf.ln(15)
-        
-        # 3. Top 5 Tickets by Company (Table Format)
+        # NEW PAGE LAYOUT - Moving directly to Top 5 Tickets by Company section
+        pdf.add_page()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 5 Tickets by Company', 0, 1, 'L')
@@ -1339,82 +1358,7 @@ else:
         
         pdf.ln(5)
         
-        # Add alert tickets section with improved formatting
-        pdf.add_page()
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 10, 'Critical Security Alerts', 0, 1, 'L')
-        
-        # Add descriptive text
-        pdf.set_font('Arial', '', 10)
-        pdf.set_text_color(0, 0, 0)
-        pdf.multi_cell(0, 5, 'The following tickets have been identified as critical security alerts requiring immediate attention based on keywords in their descriptions:')
-        pdf.ln(5)
-        
-        if 'Summary Description' in dataframe.columns:
-            alerts_mask = dataframe['Summary Description'].str.contains('Alert|Warning|Critical|Urgent|Emergency|Endgame', case=False, na=False)
-            alerts = dataframe[alerts_mask].head(10)
-            
-            if not alerts.empty:
-                # Create table header with colored background
-                pdf.set_fill_color(239, 246, 255)  # Light blue background
-                pdf.set_text_color(30, 58, 138)    # Dark blue text
-                pdf.set_font('Arial', 'B', 9)
-                pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
-                pdf.cell(20, 7, 'Priority', 1, 0, 'C', 1)
-                pdf.cell(25, 7, 'Status', 1, 0, 'C', 1)
-                pdf.cell(30, 7, 'Company', 1, 0, 'C', 1)
-                pdf.cell(95, 7, 'Alert Description', 1, 1, 'C', 1)
-                
-                # Add table data
-                pdf.set_font('Arial', '', 8)
-                pdf.set_text_color(0, 0, 0)
-                
-                # Alternate row colors for better readability
-                row_color = False
-                
-                for _, row in alerts.iterrows():
-                    ticket_num = str(row.get('Ticket #', 'N/A'))
-                    priority = str(row.get('Priority', 'N/A'))
-                    status = str(row.get('Status', 'N/A'))
-                    company = str(row.get('Company', 'N/A'))
-                    summary = str(row.get('Summary Description', 'N/A'))
-                    
-                    # Truncate long fields
-                    if len(summary) > 55:
-                        summary = summary[:52] + '...'
-                    if len(company) > 15:
-                        company = company[:12] + '...'
-                    
-                    # Set fill color for alternating rows
-                    if row_color:
-                        pdf.set_fill_color(249, 250, 251)  # Light grey
-                    else:
-                        pdf.set_fill_color(255, 255, 255)  # White
-                    
-                    pdf.cell(20, 7, ticket_num[:10], 1, 0, 'L', row_color)
-                    
-                    # Custom format for priority column
-                    if 'urgent' in priority.lower():
-                        pdf.set_text_color(239, 68, 68)  # Red
-                    elif 'high' in priority.lower():
-                        pdf.set_text_color(245, 158, 11)  # Orange
-                    elif 'medium' in priority.lower():
-                        pdf.set_text_color(251, 191, 36)  # Yellow
-                    elif 'low' in priority.lower():
-                        pdf.set_text_color(16, 185, 129)  # Green
-                    
-                    pdf.cell(20, 7, priority[:10], 1, 0, 'L', row_color)
-                    pdf.set_text_color(0, 0, 0)  # Reset text color
-                    
-                    pdf.cell(25, 7, status[:15], 1, 0, 'L', row_color)
-                    pdf.cell(30, 7, company, 1, 0, 'L', row_color)
-                    pdf.cell(95, 7, summary, 1, 1, 'L', row_color)
-                    
-                    row_color = not row_color  # Alternate row color
-            else:
-                pdf.set_font('Arial', 'I', 10)
-                pdf.cell(0, 10, 'No critical security alerts detected in the current dataset.', 0, 1, 'L')
+        # Removed Critical Security Alerts section (page 5) as requested
         
         # Add Top of Done Yets table including Resources column
         pdf.add_page()
