@@ -890,27 +890,47 @@ else:
         # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
             def header(self):
-                # Create a more prominent and visually obvious company logo
-                
-                # Draw rounded rectangle with gradient effect for logo background
-                self.set_fill_color(41, 128, 185)  # Blue background
-                self.rect(160, 8, 40, 18, style='F')
-                
-                # Add border to logo
-                self.set_draw_color(25, 80, 115)  # Darker blue border
-                self.set_line_width(0.5)
-                self.rect(160, 8, 40, 18, style='D')
-                
-                # Add company name/text in white with better positioning
-                self.set_font('Arial', 'B', 12)
-                self.set_text_color(255, 255, 255)  # White text
-                self.set_xy(160, 13)
-                self.cell(40, 8, 'COMPANY', 0, 0, 'C')
-                
-                # Draw a white highlight line for style
-                self.set_draw_color(255, 255, 255)
-                self.set_line_width(0.2)
-                self.line(162, 22, 198, 22)
+                # Use Base64 encoded image as logo
+                # Read the Base64 string from file
+                try:
+                    with open('logo_base64.txt', 'r') as f:
+                        logo_b64 = f.read()
+                    
+                    # Create a temporary file for the image
+                    import tempfile
+                    import os
+                    import base64
+                    
+                    # Create temporary file
+                    temp = tempfile.NamedTemporaryFile(delete=False, suffix='.jpeg')
+                    temp_filename = temp.name
+                    
+                    # Write decoded base64 image to the temporary file
+                    with open(temp_filename, 'wb') as f:
+                        f.write(base64.b64decode(logo_b64))
+                    
+                    # Add image to PDF
+                    self.image(temp_filename, x=160, y=8, w=40)
+                    
+                    # Clean up the temporary file
+                    os.unlink(temp_filename)
+                    
+                except Exception as e:
+                    # Fallback to text-based logo if there's any error
+                    # Draw logo background
+                    self.set_fill_color(41, 128, 185)  # Blue background
+                    self.rect(160, 8, 40, 18, style='F')
+                    
+                    # Add border
+                    self.set_draw_color(25, 80, 115)  # Darker blue border
+                    self.set_line_width(0.5)
+                    self.rect(160, 8, 40, 18, style='D')
+                    
+                    # Add company name/text
+                    self.set_font('Arial', 'B', 12)
+                    self.set_text_color(255, 255, 255)  # White text
+                    self.set_xy(160, 13)
+                    self.cell(40, 8, 'COMPANY', 0, 0, 'C')
                 
                 # Add title and subtitle
                 self.set_font('Arial', 'B', 15)
