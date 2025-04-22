@@ -1205,15 +1205,15 @@ else:
             for status, count in status_counts.items():
                 percentage = (count / total_tickets) * 100
                 
-                # Find matching emoji for status
-                emoji = '•'
-                for status_key, status_emoji in status_emojis.items():
+                # Find matching indicator for status
+                status_indicator = '-'
+                for status_key, indicator in status_emojis.items():
                     if status_key.lower() in status.lower():
-                        emoji = status_emoji
+                        status_indicator = indicator
                         break
                 
-                # Format status with emoji
-                display_status = f"{emoji} {status}"
+                # Format status with indicator
+                display_status = f"{status_indicator} {status}"
                 
                 # Set alternating row colors
                 if row_color:
