@@ -325,50 +325,102 @@ with st.sidebar:
         
     if 'date_max' not in st.session_state:
         st.session_state.date_max = None
+        
+    if 'uploaded' not in st.session_state:
+        st.session_state.uploaded = False
     
-    # Always load the sample data file on startup
-    try:
-        # Load all 157 tickets from the attached CSV file
-        csv_path = "attached_assets/srboard.csv"
-        
-        # First, manually count lines to confirm we have 158 total lines (157 tickets + header)
-        with open(csv_path, 'r') as f:
-            total_lines = sum(1 for line in f)
-        
-        # Now read with pandas
-        df = pd.read_csv(csv_path, encoding='utf-8-sig')
-        
-        # Display total count before any processing
-        st.write(f"Total tickets in CSV: {len(df)} (should be 157)")
-        
-        # Clean data
-        df = clean_data(df)
-        
-        # Force all 157 tickets to appear - this is critical!
-        st.write(f"Displaying all {len(df)} tickets from file")
-        
-        # Add timestamp to ensure we're seeing fresh data
-        st.write(f"Data last loaded: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-        
-        # Store processed data in session state
-        st.session_state.data = df
-        
-        # Extract date range from data
-        date_col = 'Last Update'
-        if date_col in df.columns and not df[date_col].empty:
-            # Convert to datetime if not already
-            df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+    # Add a reset button to clear uploaded file data
+    if st.session_state.data is not None and 'uploaded' in st.session_state and st.session_state.uploaded:
+        if st.button("Reset to Sample Data"):
+            # Clear uploaded file from session state
+            st.session_state.data = None
+            st.session_state.uploaded = False
+            # Force refresh
+            st.rerun()
+    
+    # Process uploaded file if available
+    if uploaded_file is not None:
+        try:
+            # Read the uploaded file
+            df = pd.read_csv(uploaded_file, encoding='utf-8-sig')
             
-            # Filter out invalid dates
-            valid_dates = df[date_col].dropna()
+            # Display total count before any processing
+            st.info(f"✅ Total tickets in uploaded CSV: {len(df)}")
             
-            if not valid_dates.empty:
-                st.session_state.date_min = valid_dates.min().date()
-                st.session_state.date_max = valid_dates.max().date()
-        
-        st.success("File processed successfully!")
-    except Exception as e:
-        st.error(f"Error processing file: {str(e)}")
+            # Clean data
+            df = clean_data(df)
+            
+            # Force all tickets to appear
+            st.write(f"Displaying all {len(df)} tickets from uploaded file")
+            
+            # Add timestamp to ensure we're seeing fresh data
+            st.write(f"Data last loaded: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # Store processed data in session state
+            st.session_state.data = df
+            # Mark as uploaded in session state
+            st.session_state.uploaded = True
+            
+            # Extract date range from data
+            date_col = 'Last Update'
+            if date_col in df.columns and not df[date_col].empty:
+                # Convert to datetime if not already
+                df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+                
+                # Filter out invalid dates
+                valid_dates = df[date_col].dropna()
+                
+                if not valid_dates.empty:
+                    st.session_state.date_min = valid_dates.min().date()
+                    st.session_state.date_max = valid_dates.max().date()
+            
+            st.success("Uploaded file processed successfully!")
+        except Exception as e:
+            st.error(f"Error processing uploaded file: {str(e)}")
+    # Load sample data if no file is uploaded and no data is loaded yet
+    elif st.session_state.data is None:
+        try:
+            # Load sample tickets from the attached CSV file
+            csv_path = "attached_assets/srboard.csv"
+            
+            # First, manually count lines to confirm we have 158 total lines (157 tickets + header)
+            with open(csv_path, 'r') as f:
+                total_lines = sum(1 for line in f)
+            
+            # Now read with pandas
+            df = pd.read_csv(csv_path, encoding='utf-8-sig')
+            
+            # Display total count before any processing
+            st.write(f"Total tickets in sample CSV: {len(df)} (should be 157)")
+            
+            # Clean data
+            df = clean_data(df)
+            
+            # Force all 157 tickets to appear - this is critical!
+            st.write(f"Displaying all {len(df)} tickets from sample file")
+            
+            # Add timestamp to ensure we're seeing fresh data
+            st.write(f"Data last loaded: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # Store processed data in session state
+            st.session_state.data = df
+            
+            # Extract date range from data
+            date_col = 'Last Update'
+            if date_col in df.columns and not df[date_col].empty:
+                # Convert to datetime if not already
+                df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+                
+                # Filter out invalid dates
+                valid_dates = df[date_col].dropna()
+                
+                if not valid_dates.empty:
+                    st.session_state.date_min = valid_dates.min().date()
+                    st.session_state.date_max = valid_dates.max().date()
+            
+            st.success("Sample file processed successfully!")
+        except Exception as e:
+            st.error(f"Error processing sample file: {str(e)}")
     
     # Date filters (only show if data is loaded) - with custom time periods
     if st.session_state.data is not None:
