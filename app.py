@@ -23,7 +23,7 @@ from utils.visualizations import (
 
 # Set page configuration
 st.set_page_config(
-    page_title="NOC Security Dashboard",
+    page_title="Daily SOC Insights",
     page_icon="🔒",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -296,7 +296,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Application title with enhanced styling
-st.markdown("<h1 class='main-header'>NOC - Security Ticket Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-header'>Daily SOC Insights</h1>", unsafe_allow_html=True)
 
 # Display the new logo in header
 with open('attached_assets/idggKYNyFJ_logos.jpeg', 'rb') as f:
@@ -1000,13 +1000,13 @@ else:
                 self.set_font('Arial', 'B', 15)
                 self.set_text_color(*self.brand_color)  # Use custom brand color
                 self.set_xy(10, 10)
-                self.cell(0, 10, 'NOC - Security Ticket Dashboard', 0, 1, 'C')
+                self.cell(0, 10, 'Daily SOC Insights', 0, 1, 'C')
                 
                 # Add generation timestamp based on user preference
                 if self.include_timestamp:
                     self.set_font('Arial', 'I', 10)
                     self.set_text_color(100, 100, 100)
-                    self.cell(0, 5, f'Executive Report - Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1, 'C')
+                    self.cell(0, 5, f'Executive Report - Generated on {datetime.now().strftime("%d %B %Y")}', 0, 1, 'C')
                 
                 # Add a line
                 self.set_draw_color(59, 130, 246)  # Blue line
