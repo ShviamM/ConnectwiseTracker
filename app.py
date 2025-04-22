@@ -1112,19 +1112,19 @@ else:
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Ticket Status Distribution', 0, 1, 'L')
         
-        # Use the exact status data provided
-        statuses = [
-            "Ready to Schedule",
-            "Waiting on Parts/Repair",
-            "Working Ticket Now",
-            "Waiting on Client",
-            "Scheduled Remote",
-            "Completed",
-            "Client Updated",
-            "Manager Review"
-        ]
-        counts = [94, 19, 15, 11, 6, 5, 3, 2]
-        percentages = [59.9, 12.1, 9.6, 7.0, 3.8, 3.2, 1.9, 1.3]
+        # Get status data from actual dataframe
+        if 'Status' in dataframe.columns:
+            # Calculate status counts and percentages
+            status_counts = dataframe['Status'].value_counts()
+            total_tickets = len(dataframe)
+            
+            # Get top 8 statuses
+            top_statuses = status_counts.head(8)
+            
+            # Prepare data for plotting
+            statuses = list(top_statuses.index)
+            counts = list(top_statuses.values)
+            percentages = [(count / total_tickets) * 100 for count in counts]
         
         # Colors for each status
         colors = [
@@ -1135,14 +1135,15 @@ else:
         # Create figure and axis
         fig, ax = plt.subplots(figsize=(10, 6))
         
-        # Plot horizontal bars
-        bars = ax.barh(statuses, counts, color=colors)
+        # Plot horizontal bars with only needed colors
+        colors_needed = colors[:len(statuses)]
+        bars = ax.barh(statuses, counts, color=colors_needed)
         
         # Adding text labels, right aligned
         for i, (bar, pct) in enumerate(zip(bars, percentages)):
             width = bar.get_width()
             ax.text(width + 1, bar.get_y() + bar.get_height() / 2,
-                    f"{counts[i]} ({pct}%)", va='center', ha='left', fontsize=10)
+                    f"{counts[i]} ({pct:.1f}%)", va='center', ha='left', fontsize=10)
         
         # Aesthetics
         ax.set_xlabel('Number of Tickets')
