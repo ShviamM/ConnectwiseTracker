@@ -8,6 +8,9 @@ import re
 import time
 import base64
 from fpdf import FPDF
+import matplotlib.pyplot as plt
+import numpy as np
+from io import BytesIO
 from utils.data_processor import clean_data, process_data
 from utils.visualizations import (
     create_status_chart, 
@@ -1164,8 +1167,59 @@ else:
                     pdf.set_xy(x_start + bar_width + 5, y_start + (i * 10))
                     pdf.cell(70, 7, f"{display_status}: {count} ({percentage:.1f}%)", 0, 1)
         
-        # Removed Ticket Status Distribution as requested
-        pdf.ln(20)
+        # Create Ticket Status Distribution with matplotlib horizontal bar chart
+        pdf.ln(10)
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Ticket Status Distribution', 0, 1, 'L')
+        
+        if 'Status' in dataframe.columns:
+            # Calculate status counts and percentages
+            status_counts = dataframe['Status'].value_counts()
+            total_tickets = len(dataframe)
+            
+            # Get top 8 statuses
+            top_statuses = status_counts.head(8)
+            
+            # Prepare data for plotting
+            statuses = list(top_statuses.index)
+            counts = list(top_statuses.values)
+            percentages = [(count / total_tickets) * 100 for count in counts]
+            
+            # Colors for each status
+            colors = [
+                "#4c81d1", "#f5a623", "#9b9b9b", "#f8e71c", 
+                "#bd10e0", "#7ed321", "#50e3c2", "#d0021b"
+            ]
+            
+            # Create figure and axis
+            fig, ax = plt.subplots(figsize=(8, 4))
+            
+            # Plot horizontal bars
+            bars = ax.barh(statuses, counts, color=colors[:len(statuses)])
+            
+            # Add text labels
+            for i, (bar, pct) in enumerate(zip(bars, percentages)):
+                width = bar.get_width()
+                ax.text(width + 1, bar.get_y() + bar.get_height()/2,
+                        f"{counts[i]} ({pct:.1f}%)", va='center', fontsize=8)
+            
+            # Aesthetics
+            ax.set_xlabel('Number of Tickets')
+            ax.set_title('Ticket Status Distribution', fontsize=12, fontweight='bold')
+            ax.invert_yaxis()  # Highest value on top
+            plt.tight_layout()
+            
+            # Save the plot to a BytesIO object
+            img_buf = BytesIO()
+            plt.savefig(img_buf, format='png', dpi=100, bbox_inches='tight')
+            img_buf.seek(0)
+            plt.close(fig)
+            
+            # Add the plot to the PDF
+            pdf.image(img_buf, x=25, y=None, w=160)
+        
+        pdf.ln(10)
         
         # Top 5 Tickets by Company section - now on the same page, no add_page()
         pdf.set_font('Arial', 'B', 14)
