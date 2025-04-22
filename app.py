@@ -26,101 +26,292 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for eye-catching executive report styling
+# Custom CSS for customer-centric, eye-catching styling
 st.markdown("""
 <style>
+    /* Main dashboard styling */
     .main-header {
         font-size: 42px !important;
         font-weight: 700 !important;
         color: #1E3A8A !important;
         text-align: center;
-        padding: 10px 0;
-        margin-bottom: 20px;
-        background: linear-gradient(90deg, #EEF2FF, #C7D2FE, #EEF2FF);
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 15px 0;
+        margin-bottom: 25px;
+        background: linear-gradient(135deg, #1E3A8A, #3B82F6, #60A5FA);
+        color: white !important;
+        border-radius: 12px;
+        box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
     }
+    
+    .dashboard-subtitle {
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 35px;
+        color: #475569;
+        line-height: 1.5;
+    }
+    
     .subheader {
-        font-size: 26px !important;
+        font-size: 28px !important;
         font-weight: 600 !important;
         color: #1E3A8A !important;
-        padding: 5px 0;
-        margin: 20px 0 15px 0;
-        border-bottom: 2px solid #C7D2FE;
+        padding: 8px 0;
+        margin: 25px 0 20px 0;
+        border-bottom: 3px solid #C7D2FE;
+        position: relative;
     }
+    
+    .subheader::after {
+        content: "";
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 80px;
+        height: 3px;
+        background-color: #3B82F6;
+    }
+    
+    /* Enhanced metrics styling */
     .metric-container {
-        background: #F9FAFB;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        border-left: 5px solid #3B82F6;
+        background: linear-gradient(to right, #F9FAFB, #F3F4F6);
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        border-left: 6px solid #3B82F6;
+        margin-bottom: 30px;
     }
+    
     .stMetric {
         background-color: white !important;
-        border-radius: 6px !important;
-        padding: 10px !important;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08) !important;
+        transition: transform 0.2s;
     }
+    
+    .stMetric:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Section headers and container styling */
     .row-header {
         font-weight: 600;
-        font-size: 18px;
-        margin-bottom: 10px;
+        font-size: 20px;
+        margin-bottom: 15px;
         color: #1E40AF;
+        display: inline-block;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #C7D2FE;
     }
+    
+    .chart-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+        margin-bottom: 25px;
+        border-top: 4px solid #3B82F6;
+    }
+    
+    .info-container {
+        background-color: #EFF6FF;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+        border-left: 5px solid #3B82F6;
+        color: #1E3A8A;
+    }
+    
+    /* Table and dataframe styling */
     div[data-testid="stDataFrame"] {
-        border-radius: 8px !important;
-        padding: 5px !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08) !important;
+        border-radius: 10px !important;
+        padding: 10px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        border: 1px solid #E5E7EB;
     }
-    /* Priority color coding */
+    
+    .table-container {
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    th {
+        background-color: #EFF6FF;
+        padding: 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #1E3A8A;
+        border-bottom: 2px solid #C7D2FE;
+    }
+    
+    td {
+        padding: 10px;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    
+    tr:hover {
+        background-color: #F9FAFB;
+    }
+    
+    /* Priority color coding with improved styling */
     .priority-urgent {
         background-color: #EF4444 !important;
         color: white !important;
-        padding: 2px 8px;
-        border-radius: 4px;
+        padding: 4px 10px;
+        border-radius: 6px;
         font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
     }
+    
     .priority-high {
         background-color: #F59E0B !important;
         color: white !important;
-        padding: 2px 8px;
-        border-radius: 4px;
+        padding: 4px 10px;
+        border-radius: 6px;
         font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
     }
+    
     .priority-medium {
         background-color: #FBBF24 !important;
         color: #1F2937 !important;
-        padding: 2px 8px;
-        border-radius: 4px;
+        padding: 4px 10px;
+        border-radius: 6px;
         font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 2px 4px rgba(251, 191, 36, 0.3);
     }
+    
     .priority-low {
         background-color: #10B981 !important;
         color: white !important;
-        padding: 2px 8px;
-        border-radius: 4px;
+        padding: 4px 10px;
+        border-radius: 6px;
         font-weight: 600;
+        display: inline-block;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
     }
-    /* Download button styling */
+    
+    /* Status label styling */
+    .status-open {
+        background-color: #3B82F6;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    
+    .status-closed {
+        background-color: #10B981;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    
+    .status-waiting {
+        background-color: #F59E0B;
+        color: white;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    
+    /* Download button styling with animation */
     div.stDownloadButton > button {
-        background-color: #3B82F6 !important;
+        background: linear-gradient(135deg, #1E40AF, #3B82F6) !important;
         color: white !important;
-        border-radius: 6px !important;
-        padding: 4px 20px !important;
-        font-weight: 500 !important;
+        border-radius: 8px !important;
+        padding: 8px 24px !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px !important;
         border: none !important;
-        box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3) !important;
+        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3) !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        overflow: hidden !important;
     }
+    
     div.stDownloadButton > button:hover {
-        background-color: #2563EB !important;
-        box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4) !important;
+        background: linear-gradient(135deg, #1E3A8A, #3B82F6) !important;
+        box-shadow: 0 6px 12px rgba(59, 130, 246, 0.4) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    div.stDownloadButton > button:active {
+        transform: translateY(1px) !important;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.4) !important;
+    }
+    
+    /* Sidebar styling */
+    section[data-testid="stSidebar"] {
+        background-color: #F8FAFC !important;
+        border-right: 1px solid #E5E7EB !important;
+    }
+    
+    section[data-testid="stSidebar"] > div {
+        padding: 2rem 1rem;
+    }
+    
+    section[data-testid="stSidebar"] .stSelectbox label,
+    section[data-testid="stSidebar"] .stDateInput label {
+        color: #1E3A8A !important;
+        font-weight: 600 !important;
+    }
+    
+    section[data-testid="stSidebar"] h2 {
+        color: #1E3A8A !important;
+        font-weight: 700 !important;
+        font-size: 1.5rem !important;
+        margin-bottom: 1rem !important;
+        border-bottom: 2px solid #C7D2FE;
+        padding-bottom: 0.5rem;
+    }
+    
+    /* Responsive fixes */
+    @media (max-width: 768px) {
+        .main-header {
+            font-size: 32px !important;
+            padding: 10px 0;
+        }
+        
+        .subheader {
+            font-size: 24px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
 
 # Application title with enhanced styling
 st.markdown("<h1 class='main-header'>NOC - Security Ticket Dashboard</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-size: 18px; margin-bottom: 30px;'>Visualizing security ticket statistics and metrics from Connectwise</p>", unsafe_allow_html=True)
+
+# Customer-centric subtitle
+st.markdown("""
+<div class='dashboard-subtitle'>
+    <p>Real-time monitoring of critical security incidents to ensure your systems remain protected.</p>
+    <p>Helping your team prioritize responses and improve service delivery through comprehensive analytics.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Current date/time indicator for dashboard freshness
+current_time = datetime.now().strftime("%B %d, %Y %I:%M %p")
+st.markdown(f"""
+<div style='text-align: center; margin-bottom: 30px;'>
+    <span style='background-color: #EFF6FF; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #1E3A8A;'>
+        <strong>Dashboard Updated:</strong> {current_time}
+    </span>
+</div>
+""", unsafe_allow_html=True)
 
 # Sidebar for file upload and filters
 with st.sidebar:
@@ -503,114 +694,412 @@ else:
         use_container_width=True
     )
     
-    # Create PDF export function
+    # Create enhanced PDF export function for comprehensive executive report
     def create_pdf(dataframe):
-        pdf = FPDF()
+        # Create a custom PDF class to add header and footer
+        class PDF(FPDF):
+            def header(self):
+                # Add logo or header image
+                self.set_font('Arial', 'B', 15)
+                self.set_text_color(30, 58, 138)  # Dark blue color
+                self.cell(0, 10, 'NOC - Security Ticket Dashboard', 0, 1, 'C')
+                self.set_font('Arial', 'I', 10)
+                self.set_text_color(100, 100, 100)
+                self.cell(0, 5, f'Executive Report - Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1, 'C')
+                # Add a line
+                self.set_draw_color(59, 130, 246)  # Blue line
+                self.line(10, 25, 200, 25)
+                self.ln(10)
+                
+            def footer(self):
+                # Position at 1.5 cm from bottom
+                self.set_y(-15)
+                self.set_font('Arial', 'I', 8)
+                self.set_text_color(100, 100, 100)
+                self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+                
+        # Create PDF object
+        pdf = PDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
         
-        # Configure title and header
-        pdf.set_font('Arial', 'B', 16)
-        pdf.cell(0, 10, 'NOC - Security Ticket Dashboard Report', 0, 1, 'C')
-        pdf.set_font('Arial', '', 10)
-        pdf.cell(0, 10, f'Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1, 'C')
-        pdf.ln(5)
-        
-        # Add summary metrics
+        # Add executive summary
         pdf.set_font('Arial', 'B', 14)
-        pdf.cell(0, 10, 'Summary Metrics', 0, 1, 'L')
-        pdf.set_font('Arial', '', 10)
-        pdf.cell(60, 10, f'Total Tickets: {len(dataframe)}', 0, 0)
+        pdf.set_text_color(30, 58, 138)  # Dark blue color
+        pdf.cell(0, 10, 'Executive Summary', 0, 1, 'L')
         
+        # Add a fancy box around summary stats
+        pdf.set_fill_color(239, 246, 255)  # Light blue background
+        pdf.set_draw_color(199, 210, 254)  # Border color
+        pdf.rect(10, pdf.get_y(), 190, 25, 'DF')
+        
+        # Add summary text
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_xy(15, pdf.get_y() + 5)
+        
+        # Summary metrics in a cleaner format
         if 'Age_Numeric' in dataframe.columns:
             avg_age = dataframe['Age_Numeric'].mean()
-            pdf.cell(60, 10, f'Average Age: {avg_age:.1f} days', 0, 0)
+            urgent_count = len(dataframe[dataframe['Priority'].str.contains('Urgent', case=False, na=False)])
+            open_count = len(dataframe[dataframe['Status'].str.contains('Open|New|In Progress', case=False, na=False)])
+            
+            summary_text = (
+                f"This report contains details on {len(dataframe)} security tickets. "
+                f"The average ticket age is {avg_age:.1f} days with {urgent_count} urgent issues. "
+                f"Currently, {open_count} tickets require attention."
+            )
+            
+            # Add text with line breaks if needed
+            pdf.multi_cell(180, 5, summary_text)
+        else:
+            pdf.multi_cell(180, 5, f"This report contains details on {len(dataframe)} security tickets.")
+            
+        pdf.ln(10)
         
-        pdf.ln(15)
-        
-        # Add top 10 oldest tickets
+        # Add priority distribution section with colored legend
         pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Ticket Priority Distribution', 0, 1, 'L')
+        
+        # Count tickets by priority
+        priority_counts = {
+            'Urgent': len(dataframe[dataframe['Priority'].str.contains('Urgent', case=False, na=False)]),
+            'High': len(dataframe[dataframe['Priority'].str.contains('High', case=False, na=False)]),
+            'Medium': len(dataframe[dataframe['Priority'].str.contains('Medium', case=False, na=False)]),
+            'Low': len(dataframe[dataframe['Priority'].str.contains('Low', case=False, na=False)])
+        }
+        
+        # Create colored boxes for priorities
+        pdf.set_font('Arial', 'B', 10)
+        
+        # Urgent - Red
+        pdf.set_fill_color(239, 68, 68)
+        pdf.set_text_color(255, 255, 255)
+        pdf.rect(15, pdf.get_y() + 2, 8, 8, 'F')
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_xy(25, pdf.get_y() + 2)
+        pdf.cell(30, 8, f"Urgent: {priority_counts['Urgent']}", 0, 0)
+        
+        # High - Orange
+        pdf.set_fill_color(245, 158, 11)
+        pdf.rect(65, pdf.get_y(), 8, 8, 'F')
+        pdf.set_xy(75, pdf.get_y())
+        pdf.cell(30, 8, f"High: {priority_counts['High']}", 0, 0)
+        
+        # Medium - Yellow
+        pdf.set_fill_color(251, 191, 36)
+        pdf.rect(115, pdf.get_y(), 8, 8, 'F')
+        pdf.set_xy(125, pdf.get_y())
+        pdf.cell(30, 8, f"Medium: {priority_counts['Medium']}", 0, 0)
+        
+        # Low - Green
+        pdf.set_fill_color(16, 185, 129)
+        pdf.rect(165, pdf.get_y(), 8, 8, 'F')
+        pdf.set_xy(175, pdf.get_y())
+        pdf.cell(30, 8, f"Low: {priority_counts['Low']}", 0, 1)
+        
+        pdf.ln(10)
+        
+        # Add top 10 oldest tickets section
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 10 Oldest Tickets', 0, 1, 'L')
         
         if 'Age_Numeric' in dataframe.columns:
             oldest = dataframe.sort_values('Age_Numeric', ascending=False).head(10)
             
-            # Create table header
+            # Create table header with colored background
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.set_text_color(30, 58, 138)    # Dark blue text
             pdf.set_font('Arial', 'B', 9)
-            pdf.cell(25, 7, 'Ticket #', 1, 0, 'C')
-            pdf.cell(25, 7, 'Priority', 1, 0, 'C')
-            pdf.cell(20, 7, 'Age', 1, 0, 'C')
-            pdf.cell(30, 7, 'Status', 1, 0, 'C')
-            pdf.cell(90, 7, 'Summary', 1, 1, 'C')
+            pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
+            pdf.cell(20, 7, 'Priority', 1, 0, 'C', 1)
+            pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
+            pdf.cell(25, 7, 'Status', 1, 0, 'C', 1)
+            pdf.cell(30, 7, 'Company', 1, 0, 'C', 1)
+            pdf.cell(80, 7, 'Summary', 1, 1, 'C', 1)
             
             # Add table data
             pdf.set_font('Arial', '', 8)
+            pdf.set_text_color(0, 0, 0)
+            
+            # Alternate row colors for better readability
+            row_color = False
+            
             for _, row in oldest.iterrows():
                 # Get values with fallback for missing columns
                 ticket_num = str(row.get('Ticket #', 'N/A'))
                 priority = str(row.get('Priority', 'N/A'))
                 age = str(row.get('Age', 'N/A'))
                 status = str(row.get('Status', 'N/A'))
+                company = str(row.get('Company', 'N/A'))
                 summary = str(row.get('Summary Description', 'N/A'))
                 
                 # Truncate long fields
-                if len(summary) > 50:
-                    summary = summary[:47] + '...'
+                if len(summary) > 45:
+                    summary = summary[:42] + '...'
+                if len(company) > 15:
+                    company = company[:12] + '...'
                 
-                # Write data row
-                pdf.cell(25, 7, ticket_num[:10], 1, 0)
-                pdf.cell(25, 7, priority[:10], 1, 0)
-                pdf.cell(20, 7, age[:10], 1, 0)
-                pdf.cell(30, 7, status[:15], 1, 0)
-                pdf.cell(90, 7, summary, 1, 1)
+                # Set fill color for alternating rows
+                if row_color:
+                    pdf.set_fill_color(249, 250, 251)  # Light grey
+                else:
+                    pdf.set_fill_color(255, 255, 255)  # White
                 
-        pdf.ln(10)
+                # Set priority cell color based on level
+                pdf.cell(20, 7, ticket_num[:10], 1, 0, 'L', row_color)
+                
+                # Custom format for priority column
+                if 'urgent' in priority.lower():
+                    pdf.set_text_color(239, 68, 68)  # Red
+                elif 'high' in priority.lower():
+                    pdf.set_text_color(245, 158, 11)  # Orange
+                elif 'medium' in priority.lower():
+                    pdf.set_text_color(251, 191, 36)  # Yellow
+                elif 'low' in priority.lower():
+                    pdf.set_text_color(16, 185, 129)  # Green
+                
+                pdf.cell(20, 7, priority[:10], 1, 0, 'L', row_color)
+                pdf.set_text_color(0, 0, 0)  # Reset text color
+                
+                pdf.cell(15, 7, age[:10], 1, 0, 'L', row_color)
+                pdf.cell(25, 7, status[:15], 1, 0, 'L', row_color)
+                pdf.cell(30, 7, company, 1, 0, 'L', row_color)
+                pdf.cell(80, 7, summary, 1, 1, 'L', row_color)
+                
+                row_color = not row_color  # Alternate row color
         
-        # Add alert tickets
+        pdf.ln(5)
+        
+        # Add alert tickets section with improved formatting
+        pdf.add_page()
         pdf.set_font('Arial', 'B', 14)
-        pdf.cell(0, 10, 'Top 10 Alert Tickets', 0, 1, 'L')
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Critical Security Alerts', 0, 1, 'L')
+        
+        # Add descriptive text
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(0, 0, 0)
+        pdf.multi_cell(0, 5, 'The following tickets have been identified as critical security alerts requiring immediate attention based on keywords in their descriptions:')
+        pdf.ln(5)
         
         if 'Summary Description' in dataframe.columns:
             alerts_mask = dataframe['Summary Description'].str.contains('Alert|Warning|Critical|Urgent|Emergency|Endgame', case=False, na=False)
             alerts = dataframe[alerts_mask].head(10)
             
             if not alerts.empty:
-                # Create table header
+                # Create table header with colored background
+                pdf.set_fill_color(239, 246, 255)  # Light blue background
+                pdf.set_text_color(30, 58, 138)    # Dark blue text
                 pdf.set_font('Arial', 'B', 9)
-                pdf.cell(25, 7, 'Ticket #', 1, 0, 'C')
-                pdf.cell(25, 7, 'Priority', 1, 0, 'C')
-                pdf.cell(30, 7, 'Status', 1, 0, 'C')
-                pdf.cell(110, 7, 'Summary', 1, 1, 'C')
+                pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
+                pdf.cell(20, 7, 'Priority', 1, 0, 'C', 1)
+                pdf.cell(25, 7, 'Status', 1, 0, 'C', 1)
+                pdf.cell(30, 7, 'Company', 1, 0, 'C', 1)
+                pdf.cell(95, 7, 'Alert Description', 1, 1, 'C', 1)
                 
                 # Add table data
                 pdf.set_font('Arial', '', 8)
+                pdf.set_text_color(0, 0, 0)
+                
+                # Alternate row colors for better readability
+                row_color = False
+                
                 for _, row in alerts.iterrows():
                     ticket_num = str(row.get('Ticket #', 'N/A'))
                     priority = str(row.get('Priority', 'N/A'))
                     status = str(row.get('Status', 'N/A'))
+                    company = str(row.get('Company', 'N/A'))
                     summary = str(row.get('Summary Description', 'N/A'))
                     
                     # Truncate long fields
-                    if len(summary) > 60:
-                        summary = summary[:57] + '...'
+                    if len(summary) > 55:
+                        summary = summary[:52] + '...'
+                    if len(company) > 15:
+                        company = company[:12] + '...'
                     
-                    # Write data row
-                    pdf.cell(25, 7, ticket_num[:10], 1, 0)
-                    pdf.cell(25, 7, priority[:10], 1, 0)
-                    pdf.cell(30, 7, status[:15], 1, 0)
-                    pdf.cell(110, 7, summary, 1, 1)
+                    # Set fill color for alternating rows
+                    if row_color:
+                        pdf.set_fill_color(249, 250, 251)  # Light grey
+                    else:
+                        pdf.set_fill_color(255, 255, 255)  # White
+                    
+                    pdf.cell(20, 7, ticket_num[:10], 1, 0, 'L', row_color)
+                    
+                    # Custom format for priority column
+                    if 'urgent' in priority.lower():
+                        pdf.set_text_color(239, 68, 68)  # Red
+                    elif 'high' in priority.lower():
+                        pdf.set_text_color(245, 158, 11)  # Orange
+                    elif 'medium' in priority.lower():
+                        pdf.set_text_color(251, 191, 36)  # Yellow
+                    elif 'low' in priority.lower():
+                        pdf.set_text_color(16, 185, 129)  # Green
+                    
+                    pdf.cell(20, 7, priority[:10], 1, 0, 'L', row_color)
+                    pdf.set_text_color(0, 0, 0)  # Reset text color
+                    
+                    pdf.cell(25, 7, status[:15], 1, 0, 'L', row_color)
+                    pdf.cell(30, 7, company, 1, 0, 'L', row_color)
+                    pdf.cell(95, 7, summary, 1, 1, 'L', row_color)
+                    
+                    row_color = not row_color  # Alternate row color
+            else:
+                pdf.set_font('Arial', 'I', 10)
+                pdf.cell(0, 10, 'No critical security alerts detected in the current dataset.', 0, 1, 'L')
+        
+        # Add Resource Allocation section
+        pdf.ln(10)
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Resource Allocation', 0, 1, 'L')
+        
+        if 'Resources' in dataframe.columns:
+            # Get top 5 resources by ticket count
+            resource_counts = dataframe['Resources'].value_counts().head(5)
+            
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 5, 'The following shows the distribution of tickets among the top 5 technicians:')
+            pdf.ln(5)
+            
+            # Create resource allocation table
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.set_text_color(30, 58, 138)    # Dark blue text
+            pdf.set_font('Arial', 'B', 9)
+            pdf.cell(80, 7, 'Technician', 1, 0, 'C', 1)
+            pdf.cell(30, 7, 'Ticket Count', 1, 0, 'C', 1)
+            pdf.cell(30, 7, 'Percentage', 1, 1, 'C', 1)
+            
+            # Add resource data
+            pdf.set_font('Arial', '', 9)
+            pdf.set_text_color(0, 0, 0)
+            
+            total_tickets = len(dataframe)
+            
+            for resource, count in resource_counts.items():
+                resource_name = str(resource) if not pd.isna(resource) else "Unassigned"
+                percentage = (count / total_tickets) * 100
+                
+                pdf.cell(80, 7, resource_name[:40], 1, 0, 'L')
+                pdf.cell(30, 7, str(count), 1, 0, 'C')
+                pdf.cell(30, 7, f"{percentage:.1f}%", 1, 1, 'C')
+        
+        # Add recommendations section
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 10, 'Recommendations & Next Steps', 0, 1, 'L')
+        
+        # Add decorative line
+        pdf.set_draw_color(59, 130, 246)  # Blue line
+        pdf.line(10, pdf.get_y(), 200, pdf.get_y())
+        pdf.ln(5)
+        
+        # Generate some basic recommendations based on the data
+        pdf.set_font('Arial', '', 10)
+        pdf.set_text_color(0, 0, 0)
+        
+        # Count tickets by age groups
+        if 'Age_Numeric' in dataframe.columns:
+            old_tickets = len(dataframe[dataframe['Age_Numeric'] > 30])
+            new_tickets = len(dataframe[dataframe['Age_Numeric'] <= 7])
+            urgent_tickets = len(dataframe[dataframe['Priority'].str.contains('Urgent', case=False, na=False)])
+            
+            # Add styled recommendations
+            pdf.set_font('Arial', 'B', 10)
+            pdf.set_text_color(30, 64, 175)  # Indigo
+            pdf.cell(0, 7, '1. Aging Ticket Management:', 0, 1)
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 5, f'There are {old_tickets} tickets that have been open for more than 30 days. Consider reviewing these tickets and either escalating priority or assigning additional resources to clear this backlog.')
+            pdf.ln(3)
+            
+            pdf.set_font('Arial', 'B', 10)
+            pdf.set_text_color(30, 64, 175)  # Indigo
+            pdf.cell(0, 7, '2. Critical Alert Response:', 0, 1)
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 5, f'With {urgent_tickets} urgent tickets in the system, consider implementing a dedicated rapid response team that can address critical security alerts within 4 hours of reporting.')
+            pdf.ln(3)
+            
+            pdf.set_font('Arial', 'B', 10)
+            pdf.set_text_color(30, 64, 175)  # Indigo
+            pdf.cell(0, 7, '3. Workload Distribution:', 0, 1)
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 5, 'Review resource allocation to ensure balanced workloads. Consider reassigning tickets from heavily loaded technicians to those with capacity to improve response times.')
+            pdf.ln(3)
+            
+            pdf.set_font('Arial', 'B', 10)
+            pdf.set_text_color(30, 64, 175)  # Indigo
+            pdf.cell(0, 7, '4. Recent Ticket Analysis:', 0, 1)
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 5, f'There are {new_tickets} tickets created in the past week. Monitor this trend to determine if additional resources are needed to handle increasing security incidents.')
+            pdf.ln(3)
+            
+            pdf.set_font('Arial', 'B', 10)
+            pdf.set_text_color(30, 64, 175)  # Indigo
+            pdf.cell(0, 7, '5. Proactive Security Measures:', 0, 1)
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 5, 'Consider implementing automated alerting and response protocols for common security issues to reduce manual ticket creation and response time.')
+        
+        # Add footer with contact information
+        pdf.set_y(-40)
+        pdf.set_font('Arial', 'B', 10)
+        pdf.set_text_color(30, 58, 138)
+        pdf.cell(0, 7, 'For questions regarding this report, please contact:', 0, 1, 'C')
+        pdf.set_font('Arial', '', 10)
+        pdf.cell(0, 7, 'NOC Security Team | security@example.com | (555) 123-4567', 0, 1, 'C')
         
         return pdf.output(dest='S').encode('latin1')
     
-    # PDF Download button with better styling - now just one button
-    try:
-        pdf_data = create_pdf(filtered_df)
-        st.download_button(
-            label="Download Executive Report (PDF)",
-            data=pdf_data,
-            file_name=f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-            mime="application/pdf",
-            help="Download a formatted PDF report with the current filtered data"
-        )
-    except Exception as e:
-        st.error(f"Error generating PDF: {str(e)}")
-        st.info("PDF generation requires additional configuration.")
+    # Enhanced PDF download section with better styling and visual cues
+    st.markdown("<h2 class='subheader'>Executive Reporting</h2>", unsafe_allow_html=True)
+    
+    # Create an eye-catching container for the PDF download
+    st.markdown("""
+    <div style="background: linear-gradient(to right, #EEF2FF, #E0E7FF); 
+                border-radius: 10px; 
+                padding: 20px; 
+                margin: 20px 0; 
+                border-left: 5px solid #4F46E5;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <h3 style="color: #312E81; margin-top: 0;">Executive Security Report</h3>
+        <p style="color: #4B5563;">
+            Generate a comprehensive PDF report containing:
+            <ul style="margin-bottom: 15px;">
+                <li>Executive summary with key metrics</li>
+                <li>Priority distribution with visual indicators</li>
+                <li>Top 10 oldest tickets requiring attention</li>
+                <li>Critical security alerts requiring immediate action</li>
+                <li>Resource allocation analysis</li>
+                <li>Recommendations based on current data trends</li>
+            </ul>
+        </p>
+        <p style="color: #4B5563; font-style: italic; font-size: 0.9em;">
+            Perfect for management reviews and operational meetings. The report includes all data from your selected time period.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        try:
+            pdf_data = create_pdf(filtered_df)
+            st.download_button(
+                label="📊 Download Executive Security Report (PDF)",
+                data=pdf_data,
+                file_name=f"NOC_Security_Report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+                mime="application/pdf",
+                help="Download a comprehensive PDF report with the current filtered data",
+                key="pdf_download"
+            )
+        except Exception as e:
+            st.error(f"Error generating PDF: {str(e)}")
+            st.info("PDF generation requires additional configuration.")
