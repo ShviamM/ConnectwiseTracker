@@ -183,32 +183,44 @@ with st.sidebar:
     except Exception as e:
         st.error(f"Error processing file: {str(e)}")
     
-    # Date filters (only show if data is loaded)
+    # Date filters (only show if data is loaded) - with custom time periods
     if st.session_state.data is not None:
         st.subheader("Date Range")
         
-        # Set default date range if not present
-        if st.session_state.date_min is None:
-            # Default to showing all tickets regardless of date
-            st.session_state.date_min = datetime(2000, 1, 1).date()
+        # Custom time period dropdown
+        date_options = {
+            "1 Day": 1,
+            "2 Days": 2,
+            "7 Days": 7,
+            "15 Days": 15,
+            "30 Days": 30,
+            "All Time": 0  # 0 means all time
+        }
         
-        if st.session_state.date_max is None:
-            st.session_state.date_max = datetime(2030, 12, 31).date()
-            
-        # Date range selector
-        date_min = st.date_input(
-            "Start Date",
-            value=st.session_state.date_min,
-            min_value=datetime(2000, 1, 1).date(),
-            max_value=datetime(2030, 12, 31).date()
+        selected_date_range = st.selectbox(
+            "Select Time Period",
+            options=list(date_options.keys()),
+            index=5  # Default to "All Time"
         )
         
-        date_max = st.date_input(
-            "End Date",
-            value=st.session_state.date_max,
-            min_value=datetime(2000, 1, 1).date(),
-            max_value=datetime(2030, 12, 31).date()
-        )
+        # Calculate date range based on selection
+        days = date_options[selected_date_range]
+        
+        if days > 0:
+            # Calculate date range
+            date_max = datetime.now().date()
+            date_min = date_max - timedelta(days=days)
+        else:
+            # All time - set very wide range
+            date_min = datetime(2000, 1, 1).date()
+            date_max = datetime(2030, 12, 31).date()
+        
+        # Store in session state
+        st.session_state.date_min = date_min
+        st.session_state.date_max = date_max
+        
+        # Display current range for reference (can be removed if not needed)
+        st.write(f"Showing data from {date_min} to {date_max}")
         
         # Set default time period to "Daily" without showing selector
         time_period = "Daily"
@@ -235,12 +247,21 @@ else:
     # Filter data based on date range and other filters
     df = st.session_state.data
     
-    # Use the full dataset without date filtering since we're having issues with the dates
+    # Filter data by selected date range
     filtered_df = df.copy()
     
-    # Convert dates but don't filter by them - keep all rows
+    # Convert dates and filter by date range if 'Last Update' column exists
     if 'Last Update' in filtered_df.columns:
         filtered_df['Last Update'] = pd.to_datetime(filtered_df['Last Update'], errors='coerce')
+        
+        # Apply date filter if time period is not "All Time"
+        if date_options[selected_date_range] > 0:
+            # Create date range filter - make sure we're comparing datetime.date objects
+            filtered_df = filtered_df[
+                (filtered_df['Last Update'].dt.date >= date_min) & 
+                (filtered_df['Last Update'].dt.date <= date_max)
+            ]
+            st.sidebar.success(f"Showing {len(filtered_df)} tickets from the past {date_options[selected_date_range]} days.")
     
     # Apply additional filters
     if 'selected_status' in locals() and selected_status != 'All':
@@ -580,26 +601,16 @@ else:
         
         return pdf.output(dest='S').encode('latin1')
     
-    # Create download buttons with better styling
-    col1, col2 = st.columns(2)
-    
-    with col1:
+    # PDF Download button with better styling - now just one button
+    try:
+        pdf_data = create_pdf(filtered_df)
         st.download_button(
-            label="Download Data as CSV",
-            data=filtered_df.to_csv(index=False).encode('utf-8'),
-            file_name=f"security_tickets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
+            label="Download Executive Report (PDF)",
+            data=pdf_data,
+            file_name=f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+            mime="application/pdf",
+            help="Download a formatted PDF report with the current filtered data"
         )
-    
-    with col2:
-        try:
-            pdf_data = create_pdf(filtered_df)
-            st.download_button(
-                label="Download Executive Report (PDF)",
-                data=pdf_data,
-                file_name=f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
-                mime="application/pdf"
-            )
-        except Exception as e:
-            st.error(f"Error generating PDF: {str(e)}")
-            st.info("PDF generation requires additional configuration. CSV download is still available.")
+    except Exception as e:
+        st.error(f"Error generating PDF: {str(e)}")
+        st.info("PDF generation requires additional configuration.")
