@@ -295,11 +295,10 @@ st.markdown("""
 # Application title with enhanced styling
 st.markdown("<h1 class='main-header'>NOC - Security Ticket Dashboard</h1>", unsafe_allow_html=True)
 
-# Customer-centric subtitle
+# Header logo
 st.markdown("""
-<div class='dashboard-subtitle'>
-    <p>Real-time monitoring of critical security incidents to ensure your systems remain protected.</p>
-    <p>Helping your team prioritize responses and improve service delivery through comprehensive analytics.</p>
+<div style="position: absolute; top: 20px; right: 30px; z-index: 1000;">
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAE0UlEQVRo3u2aTWxcRRSFv3PfTGwnccDQRKJCoAqLFIlFV1TsEFRtpIoFbCohsSExb95MnK6EhFSJXREWCIlFpS5YICSQWtsz7yVO1YRK/CyAKoSEgBVSJBbYiZ3EJrHnvsMiVkNwkthvZlzVPqu5c+fc7507//cCJUqUKFGixP0Lk9G73P30XD42o52NOhtfE56sLjsR9zrAtRhVSdrwsxsdJb2ZSMS7M7n8wJ9Gg6xRjPOFRRPPWCORjGkWJVtvOAGgJGNFVjOuMx+JbvEqAALDwjNa54xbr2DM5T9NTCUzbvGW8jLWk4iQ2fRgfVXT9UQ8e2d3+/bVGKupbppvGl5TYtRyG8G1FnH9M+Odznz0x0AiZra1bf+npbm5/e8/tn20kNqKqubXwLsG2mWdSG9DXPQhDqxFnJvIGZjfvs3NiUQ8+1v8odVsGOu+/vO6RLx747Zt65cDR0tzc3sykc4fSXS4YRRD+r5JZqdIW6vlFogA6LoYc/DG1dFfLcaN5PMdozPdO5er9UDt1h2JeCZzLB7P9RtXKbkqGCVbW9i/5KcCSUCBSPKKhb4rua7pYnT0Eoh0vuPDg/uTdy5Xq7G+cbsGbwKGUavbUrDKLIFg1GxTrbixuqr59AKnR7JcnpVRO+eNh4Gba9pGFJR9RrdprgLdXGEbyWrGc11vIL1YKaefxCzm74JEBEbJVH7QV6nTp4ZHZ4zRnLHVfzR//v24JeNHohvfFEqfwbcCGF91WzDhKoVR1dR0CfSz4LuEd1cqnzEwCiRjmjXwrOC1QssFnwhgNKU1jqhPKuXGZzq3oy4QxwPxmkQEjIyTyHX1E3SsEG0k41mFeuE9WCg9fCOg0HJB1CfSrwR9OdPpKt3yikAiZnY7bVNSv1FqJU4i1zUKeulgIjaRjGnWGPdpd+7i9YIBONf1jzHuU8bor+TBv3dJZDO7nBE9Z2FDIbVv19JwdudUPq8DI7/fGr0V9TxwLOAiiJjN7D7idDDWUV0oveLnVj6fvTA8PAbQfaFrcjEdmOK4EOeYK4CrgVSh5fz/jopCPvdl9+nzUwCn+i+OwkRfIURo2NUJ8dlIIRUJ16RQqSjh2vR6DRdKD98IWN1WId1aKD0KrW4Lb83u85VLvU5MAT45fvjqnaY/NT82FnSdgrWRoDUFIBE/d2NZ+fiAqXG8NTfPjXQiG5n1QC37vZF8vqMnm70E4KWjR4FfghDx9e1oTrb1mKnJ05D0s4OfhL3DsYLGX7E2GZiYz2dFOPvD4YP9AEd6ei7v2bn7iEKTFhZ+uJeDRAQ8xYkbub7hYnR0V//gQGBiP9z37ZmqivIfCVWJUFVVXjFw9FRvz9CCtE57xF/y2dWpzLu5bGYC4NXnj1x45omdfxp4TsInhXjWikKCgxN6CesOVtRUvHb5dO+3AAf2J79Ib2t7DNEJTMNaHucLTYxbjnFbCj3nvww0APxHALRv3/EGwgO7LvxpyBiYDUyCJZdJHOD4qYDFAHx/6lw/8MVSdQNfWpzLZl4RekDwdpjlAh5I/i25oXNh/d62Uk7vlYerc8Pfh6xWokSJEiVK3L/8BawvprBrqFFQAAAAJXRFWHRkYXRlOmNyZWF0ZQAyMDIzLTA0LTIyVDIxOjMxOjM0KzAwOjAwv4e3BAAAACV0RVh0ZGF0ZTptb2RpZnkAMjAyMy0wNC0yMlQyMTozMTozNCswMDowMM7aDrgAAAAASUVORK5CYII=" alt="MIT Logo" style="width: 50px; height: auto;">
 </div>
 """, unsafe_allow_html=True)
 
@@ -883,16 +882,22 @@ else:
     
     # Create enhanced PDF export function for comprehensive executive report
     def create_pdf(dataframe):
-        # Create a custom PDF class to add header and footer
+        # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
             def header(self):
-                # Add logo or header image
+                # Add MIT logo to top right
+                # Set position for the logo (right side of header)
+                self.image('attached_assets/MIT_1745341936448.png', x=170, y=8, w=20)
+                
+                # Add title and subtitle
                 self.set_font('Arial', 'B', 15)
                 self.set_text_color(30, 58, 138)  # Dark blue color
                 self.cell(0, 10, 'NOC - Security Ticket Dashboard', 0, 1, 'C')
+                
                 self.set_font('Arial', 'I', 10)
                 self.set_text_color(100, 100, 100)
                 self.cell(0, 5, f'Executive Report - Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', 0, 1, 'C')
+                
                 # Add a line
                 self.set_draw_color(59, 130, 246)  # Blue line
                 self.line(10, 25, 200, 25)
@@ -1176,13 +1181,7 @@ else:
         
         # No recommendations section as requested - page 3 removed
         
-        # Add footer with contact information
-        pdf.set_y(-40)
-        pdf.set_font('Arial', 'B', 10)
-        pdf.set_text_color(30, 58, 138)
-        pdf.cell(0, 7, 'For questions regarding this report, please contact:', 0, 1, 'C')
-        pdf.set_font('Arial', '', 10)
-        pdf.cell(0, 7, 'NOC Security Team | security@example.com | (555) 123-4567', 0, 1, 'C')
+        # No contact information footer as requested
         
         return pdf.output(dest='S').encode('latin1')
     
