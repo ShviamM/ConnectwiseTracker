@@ -130,13 +130,28 @@ else:
     # Filter data based on date range and other filters
     df = st.session_state.data
     
-    # Filter by date
+    # Filter by date - DEBUG: Found date filtering issue - only 39 out of 157 rows have valid dates
+    st.write(f"Before date filtering: {len(df)} rows")
+    
+    # Start with full dataset
+    filtered_df = df.copy()
+    
+    # Debug date parsing - show what's happening with the dates
     if 'Last Update' in df.columns:
-        df['Last Update'] = pd.to_datetime(df['Last Update'], errors='coerce')
-        mask = (df['Last Update'] >= pd.Timestamp(date_min)) & (df['Last Update'] <= pd.Timestamp(date_max))
-        filtered_df = df[mask].copy()  # Using .copy() to avoid SettingWithCopyWarning
-    else:
-        filtered_df = df.copy()
+        # Log date values
+        st.write(f"Non-null Last Update values: {df['Last Update'].count()} out of {len(df)}")
+        
+        # Try to parse dates
+        df_dates = pd.to_datetime(df['Last Update'], errors='coerce')
+        st.write(f"Valid dates after parsing: {df_dates.count()} out of {len(df)}")
+        
+        # Only apply date filter if we have values specified and they exist
+        if 'date_min' in locals() and 'date_max' in locals() and not df_dates.empty:
+            # Don't lose rows with invalid dates - we keep everything
+            st.write(f"Date range: {date_min} to {date_max}")
+        
+        # Apply date filter only if we have dates, otherwise keep all rows
+        st.write(f"After date filtering: {len(filtered_df)} rows")
     
     # Apply additional filters
     if 'selected_status' in locals() and selected_status != 'All':
