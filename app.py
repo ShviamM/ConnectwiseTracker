@@ -23,7 +23,7 @@ from utils.visualizations import (
 
 # Set page configuration
 st.set_page_config(
-    page_title="NOC Security Dashboard",
+    page_title="NOC Tickets Dashboard",
     page_icon="🔒",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -296,7 +296,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Application title with enhanced styling
-st.markdown("<h1 class='main-header'>NOC - Security Ticket Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-header'>NOC Tickets Dashboard</h1>", unsafe_allow_html=True)
 
 # Display the new logo in header
 with open('attached_assets/idggKYNyFJ_logos.jpeg', 'rb') as f:
@@ -1000,7 +1000,7 @@ else:
                 self.set_font('Arial', 'B', 15)
                 self.set_text_color(*self.brand_color)  # Use custom brand color
                 self.set_xy(10, 10)
-                self.cell(0, 10, 'Daily SOC Insights', 0, 1, 'C')
+                self.cell(0, 10, 'Daily Insights', 0, 1, 'C')
                 
                 # Add generation timestamp based on user preference
                 if self.include_timestamp:
@@ -1234,12 +1234,11 @@ else:
                 pdf.set_fill_color(239, 246, 255)  # Light blue background
                 pdf.set_text_color(30, 58, 138)    # Dark blue text
                 pdf.set_font('Arial', 'B', 9)
-                pdf.cell(18, 7, 'Ticket #', 1, 0, 'C', 1)
-                pdf.cell(18, 7, 'Priority', 1, 0, 'C', 1)
-                pdf.cell(12, 7, 'Age', 1, 0, 'C', 1)
-                pdf.cell(25, 7, 'Company', 1, 0, 'C', 1)
-                pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
-                pdf.cell(92, 7, 'Summary', 1, 1, 'C', 1)
+                pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
+                pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
+                pdf.cell(35, 7, 'Company', 1, 0, 'C', 1)
+                pdf.cell(35, 7, 'Resource', 1, 0, 'C', 1)
+                pdf.cell(85, 7, 'Summary', 1, 1, 'C', 1)
                 
                 # Add table data
                 pdf.set_font('Arial', '', 8)
@@ -1272,25 +1271,11 @@ else:
                         pdf.set_fill_color(255, 255, 255)  # White
                     
                     # Add data cells
-                    pdf.cell(18, 7, ticket_num[:9], 1, 0, 'L', row_color)
-                    
-                    # Custom format for priority column
-                    if 'urgent' in priority.lower():
-                        pdf.set_text_color(239, 68, 68)  # Red
-                    elif 'high' in priority.lower():
-                        pdf.set_text_color(245, 158, 11)  # Orange
-                    elif 'medium' in priority.lower():
-                        pdf.set_text_color(251, 191, 36)  # Yellow
-                    elif 'low' in priority.lower():
-                        pdf.set_text_color(16, 185, 129)  # Green
-                    
-                    pdf.cell(18, 7, priority[:9], 1, 0, 'L', row_color)
-                    pdf.set_text_color(0, 0, 0)  # Reset text color
-                    
-                    pdf.cell(12, 7, age[:9], 1, 0, 'L', row_color)
-                    pdf.cell(25, 7, company, 1, 0, 'L', row_color)
-                    pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
-                    pdf.cell(92, 7, summary, 1, 1, 'L', row_color)
+                    pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
+                    pdf.cell(15, 7, age[:9], 1, 0, 'L', row_color)
+                    pdf.cell(35, 7, company, 1, 0, 'L', row_color)
+                    pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
+                    pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
                     
                     row_color = not row_color  # Alternate row color
             else:
@@ -1314,13 +1299,11 @@ else:
             pdf.set_fill_color(239, 246, 255)  # Light blue background
             pdf.set_text_color(30, 58, 138)    # Dark blue text
             pdf.set_font('Arial', 'B', 9)
-            pdf.cell(18, 7, 'Ticket #', 1, 0, 'C', 1)
-            pdf.cell(18, 7, 'Priority', 1, 0, 'C', 1)
-            pdf.cell(12, 7, 'Age', 1, 0, 'C', 1)
-            pdf.cell(20, 7, 'Status', 1, 0, 'C', 1)
-            pdf.cell(25, 7, 'Company', 1, 0, 'C', 1)
-            pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
-            pdf.cell(72, 7, 'Summary', 1, 1, 'C', 1)
+            pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
+            pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
+            pdf.cell(35, 7, 'Company', 1, 0, 'C', 1)
+            pdf.cell(35, 7, 'Resource', 1, 0, 'C', 1)
+            pdf.cell(85, 7, 'Summary', 1, 1, 'C', 1)
             
             # Add table data
             pdf.set_font('Arial', '', 8)
@@ -1353,27 +1336,12 @@ else:
                 else:
                     pdf.set_fill_color(255, 255, 255)  # White
                 
-                # Set priority cell color based on level
-                pdf.cell(18, 7, ticket_num[:9], 1, 0, 'L', row_color)
-                
-                # Custom format for priority column
-                if 'urgent' in priority.lower():
-                    pdf.set_text_color(239, 68, 68)  # Red
-                elif 'high' in priority.lower():
-                    pdf.set_text_color(245, 158, 11)  # Orange
-                elif 'medium' in priority.lower():
-                    pdf.set_text_color(251, 191, 36)  # Yellow
-                elif 'low' in priority.lower():
-                    pdf.set_text_color(16, 185, 129)  # Green
-                
-                pdf.cell(18, 7, priority[:9], 1, 0, 'L', row_color)
-                pdf.set_text_color(0, 0, 0)  # Reset text color
-                
-                pdf.cell(12, 7, age[:9], 1, 0, 'L', row_color)
-                pdf.cell(20, 7, status[:12], 1, 0, 'L', row_color)
-                pdf.cell(25, 7, company, 1, 0, 'L', row_color)
-                pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
-                pdf.cell(72, 7, summary, 1, 1, 'L', row_color)
+                # Add data cells
+                pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
+                pdf.cell(15, 7, age[:9], 1, 0, 'L', row_color)
+                pdf.cell(35, 7, company, 1, 0, 'L', row_color)
+                pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
+                pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
                 
                 row_color = not row_color  # Alternate row color
         
