@@ -1191,8 +1191,7 @@ else:
             for company, count in company_counts.items():
                 # Format company name consistently
                 company_name = company
-                if len(company_name) > 35:
-                    company_name = company_name[:32] + '...'
+                # No truncation for company name as requested
                 
                 # Calculate percentage
                 percentage = (count / total_tickets) * 100
@@ -1256,11 +1255,10 @@ else:
                     resource = str(row.get('Resources', 'N/A'))
                     summary = str(row.get('Summary Description', 'N/A'))
                     
-                    # Truncate long fields
+                    # Truncate long fields, but keep full company name
                     if len(summary) > 45:
                         summary = summary[:42] + '...'
-                    if len(company) > 12:
-                        company = company[:9] + '...'
+                    # No truncation for company name as requested
                     if len(resource) > 12:
                         resource = resource[:9] + '...'
                     
@@ -1322,11 +1320,10 @@ else:
                 resource = str(row.get('Resources', 'N/A'))
                 summary = str(row.get('Summary Description', 'N/A'))
                 
-                # Truncate long fields
+                # Truncate long fields, but keep full company name
                 if len(summary) > 40:
                     summary = summary[:37] + '...'
-                if len(company) > 12:
-                    company = company[:9] + '...'
+                # No truncation for company name as requested
                 if len(resource) > 12:
                     resource = resource[:9] + '...'
                 
