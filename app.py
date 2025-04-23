@@ -948,20 +948,50 @@ else:
             
         # Map of problematic unicode characters to their ASCII equivalents
         char_map = {
-            '–': '-',  # en dash
-            '—': '-',  # em dash
-            '•': '*',  # bullet
-            '…': '...',  # ellipsis
-            '"': '"',  # left double quote
-            '"': '"',  # right double quote
-            ''': "'",  # left single quote
-            ''': "'",  # right single quote
-            '′': "'",  # prime
-            '″': '"',  # double prime
+            '–': '-',      # en dash
+            '—': '-',      # em dash
+            '•': '*',      # bullet
+            '…': '...',    # ellipsis
+            '"': '"',      # left double quote
+            '"': '"',      # right double quote
+            ''': "'",      # left single quote
+            ''': "'",      # right single quote
+            '′': "'",      # prime
+            '″': '"',      # double prime
+            '©': '(c)',    # copyright
+            '®': '(R)',    # registered trademark
+            '™': '(TM)',   # trademark
+            '≤': '<=',     # less than or equal
+            '≥': '>=',     # greater than or equal
+            '±': '+/-',    # plus-minus
+            '½': '1/2',    # one half
+            '¼': '1/4',    # one quarter
+            '¾': '3/4',    # three quarters
+            '\u2713': 'v', # checkmark
+            '\u2714': 'v', # heavy checkmark
+            '\u2717': 'x', # ballot x
+            '\u2718': 'x', # heavy ballot x
+            '\u25cf': '*', # black circle
+            '\u2022': '-', # bullet
+            '\u2018': "'", # left single quotation mark
+            '\u2019': "'", # right single quotation mark
+            '\u201c': '"', # left double quotation mark
+            '\u201d': '"', # right double quotation mark
+            '\u2013': '-', # en dash
+            '\u2014': '--',# em dash
+            '\u2026': '...',# horizontal ellipsis
+            '\u00a0': ' ', # non-breaking space
+            '\u00ad': '-', # soft hyphen
+            '👍': '(thumbs up)',
+            '❌': 'X',
+            '✅': 'v',
+            '🔵': '(blue)',
+            '🔶': '(orange)',
+            '🔴': '(red)',
+            '💙': '(blue heart)',
+            '❤️': '(red heart)',
             '×': 'x',  # multiplication sign
             '÷': '/',  # division sign
-            '≤': '<=', # less than or equal
-            '≥': '>=', # greater than or equal
         }
         
         for char, replacement in char_map.items():
@@ -1205,7 +1235,7 @@ else:
                 "Alliance Medical Center",
                 "Triangle Family Services",
                 "Skin Cancer & Cosmetic Dermatology Center",
-                "Azul Surgical Arts – Aesthetic",
+                "Azul Surgical Arts - Aesthetic",
                 "ENT Specialty Partners",
                 "Riverdale Family Practice"
             ],
@@ -1228,7 +1258,7 @@ else:
         
         # Display company data
         for i in range(len(company_data["Company"])):
-            company = company_data["Company"][i]
+            company = sanitize_for_pdf(company_data["Company"][i])
             count = company_data["Count"][i]
             
             # Set fill color for alternating rows
@@ -1301,12 +1331,12 @@ else:
         row_color = False
         
         for _, row in done_yet_tickets.iterrows():
-            # Get values with fallback for missing columns
+            # Get values with fallback for missing columns and sanitize text for PDF
             ticket_num = str(row.get('Ticket #', 'N/A'))
             age = str(row.get('Age', 'N/A'))
-            company = str(row.get('Company', 'N/A'))
-            resource = str(row.get('Resource', 'N/A'))
-            summary = str(row.get('Summary', 'N/A'))
+            company = sanitize_for_pdf(str(row.get('Company', 'N/A')))
+            resource = sanitize_for_pdf(str(row.get('Resource', 'N/A')))
+            summary = sanitize_for_pdf(str(row.get('Summary', 'N/A')))
             
             # Truncate long fields, but keep full company name
             if len(summary) > 45:
@@ -1350,7 +1380,7 @@ else:
                 "Skin Cancer & Cosmetic Dermatology Center", 
                 "Crossroad Health Center (CHC)", 
                 "Child Care Resources Inc.", 
-                "Azul Surgical Arts – Aesthetic", 
+                "Azul Surgical Arts - Aesthetic", 
                 "ENT Specialty Partners", 
                 "Triangle Family Services", 
                 "Alliance Medical Center", 
@@ -1392,12 +1422,12 @@ else:
         row_color = False
         
         for _, row in oldest.iterrows():
-            # Get values with fallback for missing columns
+            # Get values with fallback for missing columns and sanitize for PDF
             ticket_num = str(row.get('Ticket #', 'N/A'))
             age = str(row.get('Age', 'N/A'))
-            company = str(row.get('Company', 'N/A'))
-            resource = str(row.get('Resource', 'N/A'))
-            summary = str(row.get('Summary', 'N/A'))
+            company = sanitize_for_pdf(str(row.get('Company', 'N/A')))
+            resource = sanitize_for_pdf(str(row.get('Resource', 'N/A')))
+            summary = sanitize_for_pdf(str(row.get('Summary', 'N/A')))
             
             # Truncate long fields, but keep full company name
             if len(summary) > 40:
