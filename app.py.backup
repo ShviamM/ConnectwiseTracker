@@ -1319,9 +1319,9 @@ else:
         pdf.set_font('Arial', 'B', 9)
         pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
         pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Company', 1, 0, 'C', 1)
-        pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Summary', 1, 1, 'C', 1)
+        pdf.cell(35, 7, 'Company', 1, 0, 'C', 1)
+        pdf.cell(35, 7, 'Resource', 1, 0, 'C', 1)
+        pdf.cell(85, 7, 'Summary', 1, 1, 'C', 1)
         
         # Add table data
         pdf.set_font('Arial', '', 8)
@@ -1354,7 +1354,7 @@ else:
             # Add data cells
             pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
             pdf.cell(15, 7, str(age)[:9], 1, 0, 'L', row_color)
-            pdf.cell(65, 7, company, 1, 0, 'L', row_color)
+            pdf.cell(35, 7, company, 1, 0, 'L', row_color)
             pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
             pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
             
@@ -1410,9 +1410,9 @@ else:
         pdf.set_font('Arial', 'B', 9)
         pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
         pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Company', 1, 0, 'C', 1)
-        pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Summary', 1, 1, 'C', 1)
+        pdf.cell(35, 7, 'Company', 1, 0, 'C', 1)
+        pdf.cell(35, 7, 'Resource', 1, 0, 'C', 1)
+        pdf.cell(85, 7, 'Summary', 1, 1, 'C', 1)
         
         # Add table data
         pdf.set_font('Arial', '', 8)
@@ -1445,7 +1445,7 @@ else:
             # Add data cells
             pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
             pdf.cell(15, 7, str(age)[:9], 1, 0, 'L', row_color)
-            pdf.cell(65, 7, company, 1, 0, 'L', row_color)
+            pdf.cell(35, 7, company, 1, 0, 'L', row_color)
             pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
             pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
             
