@@ -1355,8 +1355,8 @@ else:
             pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
             pdf.cell(15, 7, str(age)[:9], 1, 0, 'L', row_color)
             pdf.cell(65, 7, company, 1, 0, 'L', row_color)
-            pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
-            pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
+            pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
+            pdf.cell(65, 7, summary, 1, 1, 'L', row_color)
             
             row_color = not row_color  # Alternate row color
             
@@ -1446,8 +1446,8 @@ else:
             pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
             pdf.cell(15, 7, str(age)[:9], 1, 0, 'L', row_color)
             pdf.cell(65, 7, company, 1, 0, 'L', row_color)
-            pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
-            pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
+            pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
+            pdf.cell(65, 7, summary, 1, 1, 'L', row_color)
             
             row_color = not row_color  # Alternate row color
         
