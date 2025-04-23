@@ -941,6 +941,34 @@ else:
     )
     
     # Create enhanced PDF export function for comprehensive executive report with customizable branding
+    def sanitize_for_pdf(text):
+        """Replace Unicode characters that can cause problems in PDF generation."""
+        if not isinstance(text, str):
+            return text
+            
+        # Map of problematic unicode characters to their ASCII equivalents
+        char_map = {
+            '–': '-',  # en dash
+            '—': '-',  # em dash
+            '•': '*',  # bullet
+            '…': '...',  # ellipsis
+            '"': '"',  # left double quote
+            '"': '"',  # right double quote
+            ''': "'",  # left single quote
+            ''': "'",  # right single quote
+            '′': "'",  # prime
+            '″': '"',  # double prime
+            '×': 'x',  # multiplication sign
+            '÷': '/',  # division sign
+            '≤': '<=', # less than or equal
+            '≥': '>=', # greater than or equal
+        }
+        
+        for char, replacement in char_map.items():
+            text = text.replace(char, replacement)
+            
+        return text
+            
     def create_pdf(dataframe, company_name="COMPANY", brand_color=(41, 128, 185), logo_size=40, include_timestamp=True):
         # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
@@ -1330,16 +1358,16 @@ else:
             ],
             "Resource": ["skolnati", "SShanmugham", "WHartley", "RWinsy", "GRaja", "GRaja", "JClark", "GRaja", "AMoore, G", "VSuman"],
             "Summary": [
-                "QPM | WebTitan – OTG missing for the system",
-                "QPM | Security – 90 Days Inactive Computers",
-                "QPM | Security – 90 Days Inactive Computers",
-                "QPM | Security – 90 Days Inactive Computers",
-                "QPM | Security – 90 Days Inactive Computers",
-                "QPM | Security – 90 Days Inactive Computers",
+                "QPM | WebTitan - OTG missing for the system",
+                "QPM | Security - 90 Days Inactive Computers",
+                "QPM | Security - 90 Days Inactive Computers",
+                "QPM | Security - 90 Days Inactive Computers",
+                "QPM | Security - 90 Days Inactive Computers",
+                "QPM | Security - 90 Days Inactive Computers",
                 "QPM | Inactive users 90 days found in Active Directory",
-                "QPM | Security – 90 Days Inactive Computers",
-                "QPM | Security – Unsupported OS found in environment",
-                "QPM | AV – Endgame missing on computer"
+                "QPM | Security - 90 Days Inactive Computers",
+                "QPM | Security - Unsupported OS found in environment",
+                "QPM | AV - Endgame missing on computer"
             ]
         }
         
