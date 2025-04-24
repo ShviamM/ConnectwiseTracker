@@ -772,7 +772,6 @@ dependencies = [
     { name = "pdfkit" },
     { name = "plotly" },
     { name = "reportlab" },
-    { name = "requests" },
     { name = "streamlit" },
 ]
 
@@ -785,7 +784,6 @@ requires-dist = [
     { name = "pdfkit", specifier = ">=1.0.0" },
     { name = "plotly", specifier = ">=6.0.1" },
     { name = "reportlab", specifier = ">=4.4.0" },
-    { name = "requests", specifier = ">=2.32.3" },
     { name = "streamlit", specifier = ">=1.44.1" },
 ]
 

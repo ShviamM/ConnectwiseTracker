@@ -11,6 +11,5 @@ dependencies = [
     "pdfkit>=1.0.0",
     "plotly>=6.0.1",
     "reportlab>=4.4.0",
-    "requests>=2.32.3",
     "streamlit>=1.44.1",
 ]
