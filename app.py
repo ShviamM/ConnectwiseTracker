@@ -1397,39 +1397,50 @@ else:
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 10 Oldest Tickets', 0, 1, 'L')
         
-        # Use dynamic data for oldest tickets
-        data = {
-            "Ticket #": [8411181, 8482655, 8485080, 8485307, 8485351, 8496630, 8496653, 8500176, 8506414, 8509480],
-            "Age": [65.5, 40.7, 39.8, 39.7, 39.1, 36.9, 36.9, 35.8, 33.9, 32.8],
-            "Company": [
-                "Better Health Group Services", 
-                "California Human Development", 
-                "Skin Cancer & Cosmetic Dermatology Center", 
-                "Crossroad Health Center (CHC)", 
-                "Child Care Resources Inc.", 
-                "Azul Surgical Arts - Aesthetic", 
-                "ENT Specialty Partners", 
-                "Triangle Family Services", 
-                "Alliance Medical Center", 
-                "Riverdale Family Practice"
-            ],
-            "Resource": ["skolnati", "SShanmugham", "WHartley", "RWinsy", "GRaja", "GRaja", "JClark", "GRaja", "AMoore, G", "VSuman"],
-            "Summary": [
-                "QPM | WebTitan - OTG missing for the system",
-                "QPM | Security - 90 Days Inactive Computers",
-                "QPM | Security - 90 Days Inactive Computers",
-                "QPM | Security - 90 Days Inactive Computers",
-                "QPM | Security - 90 Days Inactive Computers",
-                "QPM | Security - 90 Days Inactive Computers",
-                "QPM | Inactive users 90 days found in Active Directory",
-                "QPM | Security - 90 Days Inactive Computers",
-                "QPM | Security - Unsupported OS found in environment",
-                "QPM | AV - Endgame missing on computer"
-            ]
+        # Extract the top 10 oldest tickets from the dataframe
+        oldest_tickets = None
+        
+        if 'Age_Numeric' in dataframe.columns:
+            # Use Age_Numeric for sorting if available
+            oldest_tickets = dataframe.sort_values('Age_Numeric', ascending=False).head(10).copy()
+        elif 'Age' in dataframe.columns:
+            # Try to convert Age to numeric for sorting
+            try:
+                # Convert age to numeric, errors='coerce' will set invalid parsing as NaN
+                dataframe['Age_Temp'] = pd.to_numeric(dataframe['Age'], errors='coerce')
+                oldest_tickets = dataframe.sort_values('Age_Temp', ascending=False).head(10).copy()
+                # Drop temporary column
+                if 'Age_Temp' in oldest_tickets.columns:
+                    oldest_tickets = oldest_tickets.drop('Age_Temp', axis=1)
+            except:
+                # If conversion fails, just take the first 10 records
+                oldest_tickets = dataframe.head(10).copy()
+        else:
+            # If no Age column, just use the first 10 records
+            oldest_tickets = dataframe.head(10).copy()
+        
+        # Make sure we have the necessary columns with the right names
+        column_mapping = {
+            'Ticket #': 'Ticket #',
+            'Age': 'Age',
+            'Age_Numeric': 'Age',  # Use Age_Numeric if available
+            'Company': 'Company',
+            'Resources': 'Resource',  # Map Resources to Resource for consistency
+            'Summary Description': 'Summary'  # Map Summary Description to Summary
         }
         
-        # Create sample dataframe for display
-        oldest = pd.DataFrame(data)
+        # Create a new DataFrame with standardized column names
+        oldest_data = {}
+        for new_col, old_col in column_mapping.items():
+            if old_col in oldest_tickets.columns:
+                oldest_data[new_col] = oldest_tickets[old_col].tolist()
+            elif new_col == 'Resource' and 'Resources' in oldest_tickets.columns:
+                oldest_data['Resource'] = oldest_tickets['Resources'].tolist()
+            elif new_col == 'Summary' and 'Summary Description' in oldest_tickets.columns:
+                oldest_data['Summary'] = oldest_tickets['Summary Description'].tolist()
+        
+        # Create a proper DataFrame for the table
+        oldest = pd.DataFrame(oldest_data)
         
         # Create table header with colored background
         pdf.set_fill_color(239, 246, 255)  # Light blue background
