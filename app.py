@@ -345,6 +345,9 @@ with st.sidebar:
     private_key = st.text_input("Private Key", value="MkAwU6p0yokehpbd", 
                                help="Your ConnectWise private API key", type="password")
     
+    client_id = st.text_input("Client ID", value="1ef00dee-baa8-4ac1-a693-d54d6a6bf301", 
+                             help="Your ConnectWise client ID (integration identifier)")
+    
     site_url = st.text_input("Site URL", value="https://cw.medicusit.com", 
                             help="Your ConnectWise site URL")
     
@@ -378,6 +381,7 @@ with st.sidebar:
                     company_id=company_id,
                     public_key=public_key,
                     private_key=private_key,
+                    client_id=client_id,
                     conditions=conditions,
                     page_size=max_tickets
                 )

@@ -4,7 +4,7 @@ import json
 import pandas as pd
 from datetime import datetime
 
-def get_connectwise_tickets(site_url, company_id, public_key, private_key, conditions=None, page_size=1000):
+def get_connectwise_tickets(site_url, company_id, public_key, private_key, client_id=None, conditions=None, page_size=1000):
     """
     Fetch tickets from ConnectWise API
     
@@ -13,6 +13,7 @@ def get_connectwise_tickets(site_url, company_id, public_key, private_key, condi
         company_id: Company ID for the ConnectWise API
         public_key: Public key for the ConnectWise API
         private_key: Private key for the ConnectWise API
+        client_id: Client ID for the ConnectWise API
         conditions: Additional query conditions (optional)
         page_size: Number of records to fetch per page
         
@@ -26,9 +27,14 @@ def get_connectwise_tickets(site_url, company_id, public_key, private_key, condi
     # Setup headers
     headers = {
         "Authorization": f"Basic {encoded_auth}",
-        "clientId": company_id,
         "Content-Type": "application/json"
     }
+    
+    # Add clientId if provided
+    if client_id:
+        headers["clientId"] = client_id
+    else:
+        headers["clientId"] = company_id
     
     # Setup API URL
     api_url = f"{site_url}/v4_6_release/apis/3.0/service/tickets"
