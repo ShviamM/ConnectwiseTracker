@@ -495,12 +495,17 @@ with st.sidebar:
                 subtype_options = ['All'] + sorted(subtypes)
                 selected_subtype = st.selectbox("Subtype", subtype_options)
             
-            # Add Team filter if column exists
+            # Add Team filter if column exists (with multi-select option)
             if 'Team' in st.session_state.data.columns:
                 # Get unique teams, filtering out NaN values and convert to string
                 teams = st.session_state.data['Team'].dropna().astype(str).unique().tolist()
-                team_options = ['All'] + sorted(teams)
-                selected_team = st.selectbox("Team", team_options)
+                # Sort teams alphabetically
+                sorted_teams = sorted(teams)
+                # Use multiselect instead of selectbox for Teams
+                selected_teams = st.multiselect("Teams (Multi-select)", 
+                                               options=sorted_teams,
+                                               default=[],
+                                               help="Select multiple teams to filter by")
                 
             # Add checkbox for unassigned tickets
             st.markdown("---")
@@ -546,11 +551,17 @@ else:
         filtered_df['Subtype'] = filtered_df['Subtype'].astype(str)
         filtered_df = filtered_df[filtered_df['Subtype'] == selected_subtype]
         
-    # Apply Team filter if selected
-    if 'selected_team' in locals() and selected_team != 'All':
+    # Apply Team filter if teams are selected in the multi-select
+    if 'selected_teams' in locals() and len(selected_teams) > 0:
         # Convert Team column to string to ensure consistent comparison
         filtered_df['Team'] = filtered_df['Team'].astype(str)
-        filtered_df = filtered_df[filtered_df['Team'] == selected_team]
+        # Filter for tickets where Team is in the list of selected teams
+        filtered_df = filtered_df[filtered_df['Team'].isin(selected_teams)]
+        # Show which teams are being filtered
+        if len(selected_teams) == 1:
+            st.sidebar.success(f"Filtering by team: {selected_teams[0]}")
+        else:
+            st.sidebar.success(f"Filtering by {len(selected_teams)} teams")
     
     # Filter for unassigned tickets if the checkbox is selected
     if 'show_unassigned_only' in locals() and show_unassigned_only:
