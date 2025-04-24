@@ -785,6 +785,9 @@ else:
         
         st.markdown("</div>", unsafe_allow_html=True)
     
+    # Store the "Show Unassigned Tickets Only" state
+    unassigned_only_view = 'show_unassigned_only' in locals() and show_unassigned_only
+    
     # Visualization section with enhanced styling
     st.markdown("<h2 class='subheader'>Ticket Analytics</h2>", unsafe_allow_html=True)
     
@@ -885,20 +888,21 @@ else:
     else:
         st.error("Date data not available for trend analysis.")
     
-    # Resource allocation section with enhanced styling
-    st.markdown("<h2 class='subheader'>Resource Allocation</h2>", unsafe_allow_html=True)
-    if 'Resources' in filtered_df.columns:
-        resource_fig = create_resource_allocation_chart(filtered_df)
-        # Update layout for better styling
-        resource_fig.update_layout(
-            margin=dict(l=20, r=20, t=30, b=20),
-            paper_bgcolor='white',
-            plot_bgcolor='white',
-            font=dict(family="Arial, sans-serif", size=12)
-        )
-        st.plotly_chart(resource_fig, use_container_width=True)
-    else:
-        st.error("Resource data not available in the uploaded file.")
+    # Resource allocation section - Only display when not in unassigned tickets mode
+    if not unassigned_only_view:
+        st.markdown("<h2 class='subheader'>Resource Allocation</h2>", unsafe_allow_html=True)
+        if 'Resources' in filtered_df.columns:
+            resource_fig = create_resource_allocation_chart(filtered_df)
+            # Update layout for better styling
+            resource_fig.update_layout(
+                margin=dict(l=20, r=20, t=30, b=20),
+                paper_bgcolor='white',
+                plot_bgcolor='white',
+                font=dict(family="Arial, sans-serif", size=12)
+            )
+            st.plotly_chart(resource_fig, use_container_width=True)
+        else:
+            st.error("Resource data not available in the uploaded file.")
     
     # Top 10 Oldest Tickets section with enhanced styling
     st.markdown("<h2 class='subheader'>Top 10 Oldest Tickets</h2>", unsafe_allow_html=True)
