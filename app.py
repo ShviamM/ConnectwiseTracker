@@ -487,11 +487,25 @@ with st.sidebar:
                 resource_counts = st.session_state.data['Resources'].value_counts().head(10).index.tolist()
                 resource_options = ['All'] + sorted(resource_counts)
                 selected_resource = st.selectbox("Resource", resource_options)
+            
+            # Add Subtype filter if column exists
+            if 'Subtype' in st.session_state.data.columns:
+                # Get unique subtypes, filtering out NaN values and convert to string
+                subtypes = st.session_state.data['Subtype'].dropna().astype(str).unique().tolist()
+                subtype_options = ['All'] + sorted(subtypes)
+                selected_subtype = st.selectbox("Subtype", subtype_options)
+            
+            # Add Team filter if column exists
+            if 'Team' in st.session_state.data.columns:
+                # Get unique teams, filtering out NaN values and convert to string
+                teams = st.session_state.data['Team'].dropna().astype(str).unique().tolist()
+                team_options = ['All'] + sorted(teams)
+                selected_team = st.selectbox("Team", team_options)
                 
-                # Add checkbox for unassigned tickets
-                st.markdown("---")
-                show_unassigned_only = st.checkbox("Show Unassigned Tickets Only", 
-                                                 help="When checked, only tickets without assigned resources will be shown")
+            # Add checkbox for unassigned tickets
+            st.markdown("---")
+            show_unassigned_only = st.checkbox("Show Unassigned Tickets Only", 
+                                             help="When checked, only tickets without assigned resources will be shown")
 
 # Main content area
 if st.session_state.data is None:
@@ -525,6 +539,18 @@ else:
     
     if 'selected_resource' in locals() and selected_resource != 'All':
         filtered_df = filtered_df[filtered_df['Resources'] == selected_resource]
+        
+    # Apply Subtype filter if selected
+    if 'selected_subtype' in locals() and selected_subtype != 'All':
+        # Convert Subtype column to string to ensure consistent comparison
+        filtered_df['Subtype'] = filtered_df['Subtype'].astype(str)
+        filtered_df = filtered_df[filtered_df['Subtype'] == selected_subtype]
+        
+    # Apply Team filter if selected
+    if 'selected_team' in locals() and selected_team != 'All':
+        # Convert Team column to string to ensure consistent comparison
+        filtered_df['Team'] = filtered_df['Team'].astype(str)
+        filtered_df = filtered_df[filtered_df['Team'] == selected_team]
     
     # Filter for unassigned tickets if the checkbox is selected
     if 'show_unassigned_only' in locals() and show_unassigned_only:
