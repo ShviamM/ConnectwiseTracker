@@ -339,30 +339,20 @@ with st.sidebar:
                              help="Your ConnectWise company ID")
     
     # Use password field for keys for better security
-    public_key = st.text_input("Public Key", value="qhHQsU9gp36rC1Kx", 
+    public_key = st.text_input("Public Key", value="publicKey", 
                               help="Your ConnectWise public API key", type="password")
     
-    private_key = st.text_input("Private Key", value="MkAwU6p0yokehpbd", 
+    private_key = st.text_input("Private Key", value="privateKey", 
                                help="Your ConnectWise private API key", type="password")
     
     client_id = st.text_input("Client ID", value="1ef00dee-baa8-4ac1-a693-d54d6a6bf301", 
                              help="Your ConnectWise client ID (integration identifier)")
     
-    # Create a dropdown for choosing different API endpoints
-    api_endpoints = {
-        "API North America": "https://api-na.myconnectwise.net",
-        "HTTP North America": "http://na.myconnectwise.net"
-    }
+    # Based on client code format
+    site_url = st.text_input("Site URL", value="https://cw.medicusit.com", 
+                           help="Your ConnectWise site URL (e.g., https://cw.medicusit.com)")
     
-    selected_endpoint = st.selectbox(
-        "API Endpoint", 
-        options=list(api_endpoints.keys()),
-        index=1,  # Default to the HTTP endpoint
-        help="Select your ConnectWise API endpoint"
-    )
-    
-    site_url = api_endpoints[selected_endpoint]
-    st.info(f"Using API endpoint: {site_url}")
+    st.info("Using the ConnectWise endpoint provided in the configuration")
     
     # Add additional filter options for API query
     st.subheader("API Filters")

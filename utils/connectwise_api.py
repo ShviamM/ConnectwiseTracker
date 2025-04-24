@@ -20,24 +20,32 @@ def get_connectwise_tickets(site_url, company_id, public_key, private_key, clien
     Returns:
         DataFrame containing ticket data
     """
-    # Create the authentication string
+    # Create the authentication string based on format provided
+    # ApiClient("client_id", "site_url", "company_id").SetPublicPrivateKey("publicKey", "privateKey")
+    
+    # Format auth credentials as expected by the API
     auth_string = f"{company_id}+{public_key}:{private_key}"
     encoded_auth = base64.b64encode(auth_string.encode()).decode()
     
     # Setup headers
     headers = {
         "Authorization": f"Basic {encoded_auth}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "clientId": client_id
     }
     
-    # Add clientId if provided
-    if client_id:
-        headers["clientId"] = client_id
-    else:
-        headers["clientId"] = company_id
+    # Print debug info
+    print(f"Using client ID: {client_id}")
+    print(f"Using company ID: {company_id}")
     
-    # Setup API URL
-    api_url = f"{site_url}/v4_6_release/apis/3.0/service/tickets"
+    # Setup API URL based on the format provided
+    if not site_url.endswith('/'):
+        site_url = f"{site_url}/"
+    
+    api_url = f"{site_url}v4_6_release/apis/3.0/service/tickets"
+    
+    # Print the URL for debugging
+    print(f"Using API URL: {api_url}")
     
     # Define parameters
     params = {"pageSize": page_size}
