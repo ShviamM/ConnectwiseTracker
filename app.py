@@ -487,6 +487,11 @@ with st.sidebar:
                 resource_counts = st.session_state.data['Resources'].value_counts().head(10).index.tolist()
                 resource_options = ['All'] + sorted(resource_counts)
                 selected_resource = st.selectbox("Resource", resource_options)
+                
+                # Add checkbox for unassigned tickets
+                st.markdown("---")
+                show_unassigned_only = st.checkbox("Show Unassigned Tickets Only", 
+                                                 help="When checked, only tickets without assigned resources will be shown")
 
 # Main content area
 if st.session_state.data is None:
@@ -520,6 +525,11 @@ else:
     
     if 'selected_resource' in locals() and selected_resource != 'All':
         filtered_df = filtered_df[filtered_df['Resources'] == selected_resource]
+    
+    # Filter for unassigned tickets if the checkbox is selected
+    if 'show_unassigned_only' in locals() and show_unassigned_only:
+        filtered_df = filtered_df[filtered_df['Resources'].isna() | (filtered_df['Resources'] == '')]
+        st.sidebar.info("Showing unassigned tickets only")
     
     # Create processed data for visualization
     processed_data = process_data(filtered_df, time_period.lower())
