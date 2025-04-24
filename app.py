@@ -481,6 +481,12 @@ with st.sidebar:
                 company_counts = st.session_state.data['Company'].value_counts().head(10).index.tolist()
                 company_options = ['All'] + sorted(company_counts)
                 selected_company = st.selectbox("Company", company_options)
+            
+            if 'Resources' in st.session_state.data.columns:
+                # Get top 10 resources by ticket count + 'All' option
+                resource_counts = st.session_state.data['Resources'].value_counts().head(10).index.tolist()
+                resource_options = ['All'] + sorted(resource_counts)
+                selected_resource = st.selectbox("Resource", resource_options)
 
 # Main content area
 if st.session_state.data is None:
@@ -511,6 +517,9 @@ else:
     
     if 'selected_company' in locals() and selected_company != 'All':
         filtered_df = filtered_df[filtered_df['Company'] == selected_company]
+    
+    if 'selected_resource' in locals() and selected_resource != 'All':
+        filtered_df = filtered_df[filtered_df['Resources'] == selected_resource]
     
     # Create processed data for visualization
     processed_data = process_data(filtered_df, time_period.lower())
