@@ -348,7 +348,7 @@ with st.sidebar:
     client_id = st.text_input("Client ID", value="1ef00dee-baa8-4ac1-a693-d54d6a6bf301", 
                              help="Your ConnectWise client ID (integration identifier)")
     
-    site_url = st.text_input("Site URL", value="https://cw.medicusit.com", 
+    site_url = st.text_input("Site URL", value="https://api-na.myconnectwise.net", 
                             help="Your ConnectWise site URL")
     
     # Add additional filter options for API query
