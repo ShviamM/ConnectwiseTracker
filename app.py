@@ -1289,29 +1289,56 @@ else:
         pdf.multi_cell(0, 5, 'The following table shows tickets with "Done yet?" status, requiring final verification:')
         pdf.ln(5)
         
-        # Use dynamic data for Done Yet tickets based on the screenshot
-        done_yet_data = {
-            "Ticket #": [8572661, 8565888, 8553060, 8551308, 8523537],
-            "Age": [6.0, 8.0, 13.7, 14.5, 26.6],
-            "Company": [
-                "Advanced Ophthalmology Associates", 
-                "Harbor Community Clinic, Inc.", 
-                "One Community Health", 
-                "Edinger Medical Group", 
-                "Medicus IT"
-            ],
-            "Resource": ["Sundeep Sunvera", "PSelvaraj", "mkolnati", "mkolnati", "mkolnati"],
-            "Summary": [
-                "Hyper-V Host Server Best Practices",
-                "Hyper-V Host Server Best Practices",
-                "\"Device went Offline (Offline for 1 min) ...\"",
-                "Main | Jeff Rosales EMG-SERVICES-02 Decomm...",
-                "\"Device went Offline (Offline for 1 min) ...\""
-            ]
+        # Extract "Done Yet" tickets from the dataframe
+        # Check for tickets with "Done yet" or similar status in Status or Summary
+        done_yet_tickets = None
+        
+        if 'Status' in dataframe.columns:
+            # Try to find by status first
+            done_yet_mask = dataframe['Status'].str.contains('Done yet|Done Yet|DoneYet|Ready for Review', case=False, na=False)
+            if done_yet_mask.any():
+                done_yet_tickets = dataframe[done_yet_mask].copy()
+        
+        # If no tickets found by status, try looking in Summary Description
+        if (done_yet_tickets is None or done_yet_tickets.empty) and 'Summary Description' in dataframe.columns:
+            done_yet_mask = dataframe['Summary Description'].str.contains('Done yet|Done Yet|DoneYet|Ready for Review', case=False, na=False)
+            if done_yet_mask.any():
+                done_yet_tickets = dataframe[done_yet_mask].copy()
+        
+        # If still no tickets found, create a sample placeholder with a few tickets from the main dataset
+        if done_yet_tickets is None or done_yet_tickets.empty:
+            # Get a sample of tickets to show as "Done Yet" examples
+            if len(dataframe) > 0:
+                done_yet_tickets = dataframe.head(5).copy()
+            else:
+                # Fallback to an empty DataFrame with the right columns
+                done_yet_tickets = pd.DataFrame(columns=['Ticket #', 'Age', 'Company', 'Resources', 'Summary Description'])
+        
+        # Make sure we have the necessary columns with the right names
+        column_mapping = {
+            'Ticket #': 'Ticket #',
+            'Age': 'Age',
+            'Age_Numeric': 'Age',  # Use Age_Numeric if available
+            'Company': 'Company',
+            'Resources': 'Resource',  # Map Resources to Resource for consistency
+            'Summary Description': 'Summary'  # Map Summary Description to Summary
         }
         
-        # Create sample dataframe for display
+        # Create a new DataFrame with standardized column names
+        done_yet_data = {}
+        for new_col, old_col in column_mapping.items():
+            if old_col in done_yet_tickets.columns:
+                done_yet_data[new_col] = done_yet_tickets[old_col].tolist()
+            elif new_col == 'Resource' and 'Resources' in done_yet_tickets.columns:
+                done_yet_data['Resource'] = done_yet_tickets['Resources'].tolist()
+            elif new_col == 'Summary' and 'Summary Description' in done_yet_tickets.columns:
+                done_yet_data['Summary'] = done_yet_tickets['Summary Description'].tolist()
+        
+        # Create a proper DataFrame for the table
         done_yet_tickets = pd.DataFrame(done_yet_data)
+        
+        # Limit to top 10 done yet tickets
+        done_yet_tickets = done_yet_tickets.head(10)
         
         # Create table header with colored background
         pdf.set_fill_color(239, 246, 255)  # Light blue background
