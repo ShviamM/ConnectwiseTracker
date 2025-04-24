@@ -934,26 +934,27 @@ else:
     else:
         st.error("Age data not available to show oldest tickets.")
     
-    # Top 10 Alerts section with enhanced styling
-    st.markdown("<h2 class='subheader'>Top 10 Alerts</h2>", unsafe_allow_html=True)
-    if 'Summary Description' in filtered_df.columns:
-        # Find alerts in ticket descriptions 
-        alerts_mask = filtered_df['Summary Description'].str.contains('Alert|Warning|Critical|Urgent|Emergency|Endgame', case=False, na=False)
-        alert_tickets = filtered_df[alerts_mask].head(10)
-        
-        if not alert_tickets.empty:
-            # Apply color coding to priority
-            if 'Priority' in alert_tickets.columns:
-                alert_tickets['Priority'] = alert_tickets['Priority'].apply(highlight_priority)
-                styled_alerts = alert_tickets[['Ticket #', 'Priority', 'Status', 'Company', 'Summary Description', 'Resources']]
+    # Top 10 Alerts section - Only display when not in unassigned view
+    if not unassigned_only_view:
+        st.markdown("<h2 class='subheader'>Top 10 Alerts</h2>", unsafe_allow_html=True)
+        if 'Summary Description' in filtered_df.columns:
+            # Find alerts in ticket descriptions 
+            alerts_mask = filtered_df['Summary Description'].str.contains('Alert|Warning|Critical|Urgent|Emergency|Endgame', case=False, na=False)
+            alert_tickets = filtered_df[alerts_mask].head(10)
+            
+            if not alert_tickets.empty:
+                # Apply color coding to priority
+                if 'Priority' in alert_tickets.columns:
+                    alert_tickets['Priority'] = alert_tickets['Priority'].apply(highlight_priority)
+                    styled_alerts = alert_tickets[['Ticket #', 'Priority', 'Status', 'Company', 'Summary Description', 'Resources']]
+                else:
+                    styled_alerts = alert_tickets[['Ticket #', 'Status', 'Company', 'Summary Description', 'Resources']]
+                    
+                st.write(styled_alerts.to_html(escape=False, index=False), unsafe_allow_html=True)
             else:
-                styled_alerts = alert_tickets[['Ticket #', 'Status', 'Company', 'Summary Description', 'Resources']]
-                
-            st.write(styled_alerts.to_html(escape=False, index=False), unsafe_allow_html=True)
+                st.info("No alert tickets found in the dataset.")
         else:
-            st.info("No alert tickets found in the dataset.")
-    else:
-        st.error("Summary data not available to show alerts.")
+            st.error("Summary data not available to show alerts.")
     
     # Detailed data view with enhanced styling
     st.markdown("<h2 class='subheader'>Detailed Ticket Data</h2>", unsafe_allow_html=True)
