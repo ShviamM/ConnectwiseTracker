@@ -348,8 +348,21 @@ with st.sidebar:
     client_id = st.text_input("Client ID", value="1ef00dee-baa8-4ac1-a693-d54d6a6bf301", 
                              help="Your ConnectWise client ID (integration identifier)")
     
-    site_url = st.text_input("Site URL", value="https://api-na.myconnectwise.net", 
-                            help="Your ConnectWise site URL")
+    # Create a dropdown for choosing different API endpoints
+    api_endpoints = {
+        "API North America": "https://api-na.myconnectwise.net",
+        "HTTP North America": "http://na.myconnectwise.net"
+    }
+    
+    selected_endpoint = st.selectbox(
+        "API Endpoint", 
+        options=list(api_endpoints.keys()),
+        index=1,  # Default to the HTTP endpoint
+        help="Select your ConnectWise API endpoint"
+    )
+    
+    site_url = api_endpoints[selected_endpoint]
+    st.info(f"Using API endpoint: {site_url}")
     
     # Add additional filter options for API query
     st.subheader("API Filters")
