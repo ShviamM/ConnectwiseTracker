@@ -11,6 +11,7 @@ from fpdf import FPDF
 import matplotlib.pyplot as plt
 import numpy as np
 from io import BytesIO
+import os
 from utils.data_processor import clean_data, process_data
 from utils.visualizations import (
     create_status_chart, 
@@ -20,6 +21,7 @@ from utils.visualizations import (
     create_resource_allocation_chart,
     create_ticket_trend_chart
 )
+from utils.connectwise_api import get_connectwise_tickets
 
 # Set page configuration
 st.set_page_config(
@@ -312,14 +314,11 @@ st.markdown(f"""
 
 # No dashboard timestamp as requested
 
-# Sidebar for file upload and filters
+# Sidebar for filters and API controls
 with st.sidebar:
     st.header("Data Controls")
     
-    # File uploader
-    uploaded_file = st.file_uploader("Upload Connectwise CSV file", type=["csv"])
-    
-    # Initialize session state for data storage if not exists
+    # Initialize session state variables
     if 'data' not in st.session_state:
         st.session_state.data = None
         
@@ -329,101 +328,138 @@ with st.sidebar:
     if 'date_max' not in st.session_state:
         st.session_state.date_max = None
         
-    if 'uploaded' not in st.session_state:
-        st.session_state.uploaded = False
+    if 'api_connected' not in st.session_state:
+        st.session_state.api_connected = False
     
-    # Add a reset button to clear uploaded file data
-    if st.session_state.data is not None and 'uploaded' in st.session_state and st.session_state.uploaded:
-        if st.button("Reset to Sample Data"):
-            # Clear uploaded file from session state
-            st.session_state.data = None
-            st.session_state.uploaded = False
-            # Force refresh
+    # Section for ConnectWise API configuration
+    st.subheader("ConnectWise API Settings")
+    
+    # Default values (can be changed by user)
+    company_id = st.text_input("Company ID", value="medicussupport", 
+                             help="Your ConnectWise company ID")
+    
+    # Use password field for keys for better security
+    public_key = st.text_input("Public Key", value="qhHQsU9gp36rC1Kx", 
+                              help="Your ConnectWise public API key", type="password")
+    
+    private_key = st.text_input("Private Key", value="MkAwU6p0yokehpbd", 
+                               help="Your ConnectWise private API key", type="password")
+    
+    site_url = st.text_input("Site URL", value="https://cw.medicusit.com", 
+                            help="Your ConnectWise site URL")
+    
+    # Add additional filter options for API query
+    st.subheader("API Filters")
+    
+    # For bigger datasets, we can add conditions
+    with st.expander("Advanced API Filters"):
+        conditions = st.text_area("API Conditions", 
+                                 placeholder="Example: status/name='Open' and priority/name='High'",
+                                 help="Optional ConnectWise query conditions")
+        
+        if conditions.strip() == "":
+            conditions = None
+            
+        # Limit the number of tickets (prevent timeout for large datasets)
+        max_tickets = st.number_input("Max Tickets", 
+                                     min_value=100, 
+                                     max_value=5000, 
+                                     value=1000,
+                                     help="Maximum number of tickets to fetch")
+    
+    # Button to fetch data from API
+    if st.button("Fetch Data from ConnectWise API"):
+        try:
+            # Show spinner while loading data
+            with st.spinner("Fetching data from ConnectWise API..."):
+                # Call the API function to get ticket data
+                df = get_connectwise_tickets(
+                    site_url=site_url,
+                    company_id=company_id,
+                    public_key=public_key,
+                    private_key=private_key,
+                    conditions=conditions,
+                    page_size=max_tickets
+                )
+                
+                # Check if we got data
+                if df.empty:
+                    st.error("No data returned from the API. Please check your credentials and filters.")
+                else:
+                    # Display total count
+                    st.info(f"✅ Successfully fetched {len(df)} tickets from ConnectWise API")
+                    
+                    # Add timestamp to ensure we're seeing fresh data
+                    current_time = time.strftime('%Y-%m-%d %H:%M:%S')
+                    st.write(f"Data last loaded: {current_time}")
+                    
+                    # Store processed data in session state
+                    st.session_state.data = df
+                    # Mark as connected to API
+                    st.session_state.api_connected = True
+                    
+                    # Extract date range from data
+                    date_col = 'Last Update'
+                    if date_col in df.columns and not df[date_col].empty:
+                        # Convert to datetime if not already
+                        df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+                        
+                        # Filter out invalid dates
+                        valid_dates = df[date_col].dropna()
+                        
+                        if not valid_dates.empty:
+                            st.session_state.date_min = valid_dates.min().date()
+                            st.session_state.date_max = valid_dates.max().date()
+                    
+                    st.success("API data fetched successfully!")
+        except Exception as e:
+            st.error(f"Error connecting to ConnectWise API: {str(e)}")
+            st.error("Please check your API credentials and network connectivity.")
+    
+    # Option to use sample data if API is not desired
+    if st.session_state.data is None:
+        if st.button("Use Sample Data Instead"):
+            try:
+                # Load sample tickets from the attached CSV file
+                csv_path = "attached_assets/srboard.csv"
+                
+                # Read with pandas
+                df = pd.read_csv(csv_path, encoding='utf-8-sig')
+                
+                # Clean data
+                df = clean_data(df)
+                
+                # Force all tickets to appear
+                st.write(f"Displaying all {len(df)} tickets from sample file")
+                
+                # Add timestamp to ensure we're seeing fresh data
+                st.write(f"Data last loaded: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                # Store processed data in session state
+                st.session_state.data = df
+                
+                # Extract date range from data
+                date_col = 'Last Update'
+                if date_col in df.columns and not df[date_col].empty:
+                    # Convert to datetime if not already
+                    df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
+                    
+                    # Filter out invalid dates
+                    valid_dates = df[date_col].dropna()
+                    
+                    if not valid_dates.empty:
+                        st.session_state.date_min = valid_dates.min().date()
+                        st.session_state.date_max = valid_dates.max().date()
+                
+                st.success("Sample file processed successfully!")
+            except Exception as e:
+                st.error(f"Error processing sample file: {str(e)}")
+    
+    # Add a refresh button when connected to API
+    if st.session_state.data is not None and st.session_state.api_connected:
+        if st.button("Refresh API Data"):
+            # Rerun the app to refresh data
             st.rerun()
-    
-    # Process uploaded file if available
-    if uploaded_file is not None:
-        try:
-            # Read the uploaded file
-            df = pd.read_csv(uploaded_file, encoding='utf-8-sig')
-            
-            # Display total count before any processing
-            st.info(f"✅ Total tickets in uploaded CSV: {len(df)}")
-            
-            # Clean data
-            df = clean_data(df)
-            
-            # Force all tickets to appear
-            st.write(f"Displaying all {len(df)} tickets from uploaded file")
-            
-            # Add timestamp to ensure we're seeing fresh data
-            st.write(f"Data last loaded: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-            
-            # Store processed data in session state
-            st.session_state.data = df
-            # Mark as uploaded in session state
-            st.session_state.uploaded = True
-            
-            # Extract date range from data
-            date_col = 'Last Update'
-            if date_col in df.columns and not df[date_col].empty:
-                # Convert to datetime if not already
-                df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
-                
-                # Filter out invalid dates
-                valid_dates = df[date_col].dropna()
-                
-                if not valid_dates.empty:
-                    st.session_state.date_min = valid_dates.min().date()
-                    st.session_state.date_max = valid_dates.max().date()
-            
-            st.success("Uploaded file processed successfully!")
-        except Exception as e:
-            st.error(f"Error processing uploaded file: {str(e)}")
-    # Load sample data if no file is uploaded and no data is loaded yet
-    elif st.session_state.data is None:
-        try:
-            # Load sample tickets from the attached CSV file
-            csv_path = "attached_assets/srboard.csv"
-            
-            # First, manually count lines to confirm we have 158 total lines (157 tickets + header)
-            with open(csv_path, 'r') as f:
-                total_lines = sum(1 for line in f)
-            
-            # Now read with pandas
-            df = pd.read_csv(csv_path, encoding='utf-8-sig')
-            
-            # Display total count before any processing
-            st.write(f"Total tickets in sample CSV: {len(df)} (should be 157)")
-            
-            # Clean data
-            df = clean_data(df)
-            
-            # Force all 157 tickets to appear - this is critical!
-            st.write(f"Displaying all {len(df)} tickets from sample file")
-            
-            # Add timestamp to ensure we're seeing fresh data
-            st.write(f"Data last loaded: {time.strftime('%Y-%m-%d %H:%M:%S')}")
-            
-            # Store processed data in session state
-            st.session_state.data = df
-            
-            # Extract date range from data
-            date_col = 'Last Update'
-            if date_col in df.columns and not df[date_col].empty:
-                # Convert to datetime if not already
-                df[date_col] = pd.to_datetime(df[date_col], errors='coerce')
-                
-                # Filter out invalid dates
-                valid_dates = df[date_col].dropna()
-                
-                if not valid_dates.empty:
-                    st.session_state.date_min = valid_dates.min().date()
-                    st.session_state.date_max = valid_dates.max().date()
-            
-            st.success("Sample file processed successfully!")
-        except Exception as e:
-            st.error(f"Error processing sample file: {str(e)}")
     
     # Date filters (only show if data is loaded) - with custom time periods
     if st.session_state.data is not None:
@@ -514,7 +550,7 @@ with st.sidebar:
 
 # Main content area
 if st.session_state.data is None:
-    st.info("Please upload a Connectwise CSV file to begin.")
+    st.info("Please fetch data from the ConnectWise API or use the sample data to begin.")
 else:
     # Filter data based on date range and other filters
     df = st.session_state.data
