@@ -996,17 +996,18 @@ else:
                     self.set_xy(x_pos, 13)
                     self.cell(self.logo_size, 8, self.company_name, 0, 0, 'C')
                 
-                # Add title and subtitle with custom brand color
+                # Add title with date in the format "Daily Insights Date, Month Year"
+                current_date = datetime.now().strftime("%d, %B %Y")
                 self.set_font('Arial', 'B', 15)
                 self.set_text_color(*self.brand_color)  # Use custom brand color
                 self.set_xy(10, 10)
-                self.cell(0, 10, 'Daily Insights', 0, 1, 'C')
+                self.cell(0, 10, f'Daily Insights {current_date}', 0, 1, 'C')
                 
                 # Add generation timestamp based on user preference
                 if self.include_timestamp:
                     self.set_font('Arial', 'I', 10)
                     self.set_text_color(100, 100, 100)
-                    self.cell(0, 5, f'Executive Report - Generated on {datetime.now().strftime("%d %B %Y")}', 0, 1, 'C')
+                    self.cell(0, 5, 'Executive Report', 0, 1, 'C')
                 
                 # Add a line
                 self.set_draw_color(59, 130, 246)  # Blue line
@@ -1392,7 +1393,7 @@ else:
             st.download_button(
                 label="🔽 Download Executive Report (PDF)",
                 data=pdf_data,
-                file_name=f"security_tickets_report_{datetime.now().strftime('%Y%m%d_%H%M')}.pdf",
+                file_name=f"Daily_Insights_{datetime.now().strftime('%d_%B_%Y')}.pdf",
                 mime="application/pdf",
                 help="Download a comprehensive PDF report with executive summary and detailed ticket metrics",
                 key="pdf_download"
