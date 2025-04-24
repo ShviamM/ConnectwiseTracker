@@ -941,64 +941,6 @@ else:
     )
     
     # Create enhanced PDF export function for comprehensive executive report with customizable branding
-    def sanitize_for_pdf(text):
-        """Replace Unicode characters that can cause problems in PDF generation."""
-        if not isinstance(text, str):
-            return text
-            
-        # Map of problematic unicode characters to their ASCII equivalents
-        char_map = {
-            '–': '-',      # en dash
-            '—': '-',      # em dash
-            '•': '*',      # bullet
-            '…': '...',    # ellipsis
-            '"': '"',      # left double quote
-            '"': '"',      # right double quote
-            ''': "'",      # left single quote
-            ''': "'",      # right single quote
-            '′': "'",      # prime
-            '″': '"',      # double prime
-            '©': '(c)',    # copyright
-            '®': '(R)',    # registered trademark
-            '™': '(TM)',   # trademark
-            '≤': '<=',     # less than or equal
-            '≥': '>=',     # greater than or equal
-            '±': '+/-',    # plus-minus
-            '½': '1/2',    # one half
-            '¼': '1/4',    # one quarter
-            '¾': '3/4',    # three quarters
-            '\u2713': 'v', # checkmark
-            '\u2714': 'v', # heavy checkmark
-            '\u2717': 'x', # ballot x
-            '\u2718': 'x', # heavy ballot x
-            '\u25cf': '*', # black circle
-            '\u2022': '-', # bullet
-            '\u2018': "'", # left single quotation mark
-            '\u2019': "'", # right single quotation mark
-            '\u201c': '"', # left double quotation mark
-            '\u201d': '"', # right double quotation mark
-            '\u2013': '-', # en dash
-            '\u2014': '--',# em dash
-            '\u2026': '...',# horizontal ellipsis
-            '\u00a0': ' ', # non-breaking space
-            '\u00ad': '-', # soft hyphen
-            '👍': '(thumbs up)',
-            '❌': 'X',
-            '✅': 'v',
-            '🔵': '(blue)',
-            '🔶': '(orange)',
-            '🔴': '(red)',
-            '💙': '(blue heart)',
-            '❤️': '(red heart)',
-            '×': 'x',  # multiplication sign
-            '÷': '/',  # division sign
-        }
-        
-        for char, replacement in char_map.items():
-            text = text.replace(char, replacement)
-            
-        return text
-            
     def create_pdf(dataframe, company_name="COMPANY", brand_color=(41, 128, 185), logo_size=40, include_timestamp=True):
         # Create a custom PDF class to add header with logo and footer
         class PDF(FPDF):
@@ -1225,53 +1167,47 @@ else:
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 10 Tickets by Company', 0, 1, 'L')
         
-        # Use static data for companies
-        company_data = {
-            "Company": [
-                "California Human Development",
-                "Better Health Group Services",
-                "Crossroad Health Center (CHC)",
-                "Child Care Resources Inc.",
-                "Alliance Medical Center",
-                "Triangle Family Services",
-                "Skin Cancer & Cosmetic Dermatology Center",
-                "Azul Surgical Arts - Aesthetic",
-                "ENT Specialty Partners",
-                "Riverdale Family Practice"
-            ],
-            "Count": [12, 10, 8, 7, 6, 5, 4, 3, 3, 2]
-        }
-        
-        # Create table header with colored background
-        pdf.set_fill_color(239, 246, 255)  # Light blue background
-        pdf.set_text_color(30, 58, 138)    # Dark blue text
-        pdf.set_font('Arial', 'B', 10)
-        pdf.cell(135, 8, 'Company Name', 1, 0, 'C', 1)
-        pdf.cell(45, 8, 'Ticket Count', 1, 1, 'C', 1)
-        
-        # Add table data
-        pdf.set_font('Arial', '', 10)
-        pdf.set_text_color(0, 0, 0)
-        
-        # Alternate row colors for better readability
-        row_color = False
-        
-        # Display company data
-        for i in range(len(company_data["Company"])):
-            company = sanitize_for_pdf(company_data["Company"][i])
-            count = company_data["Count"][i]
+        if 'Company' in dataframe.columns:
+            # Get top 10 companies by ticket count
+            company_counts = dataframe['Company'].value_counts().head(10)
             
-            # Set fill color for alternating rows
-            if row_color:
-                pdf.set_fill_color(249, 250, 251)  # Light grey
-            else:
-                pdf.set_fill_color(255, 255, 255)  # White
+            # Create table header with colored background
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.set_text_color(30, 58, 138)    # Dark blue text
+            pdf.set_font('Arial', 'B', 10)
+            pdf.cell(135, 8, 'Company Name', 1, 0, 'C', 1)
+            pdf.cell(45, 8, 'Ticket Count', 1, 1, 'C', 1)
             
-            # Add data cells
-            pdf.cell(135, 7, company, 1, 0, 'L', row_color)
-            pdf.cell(45, 7, str(count), 1, 1, 'C', row_color)
+            # Add table data
+            pdf.set_font('Arial', '', 10)
+            pdf.set_text_color(0, 0, 0)
             
-            row_color = not row_color  # Alternate row color
+            # Alternate row colors for better readability
+            row_color = False
+            
+            # Total for percentage calculation
+            total_tickets = len(dataframe)
+            
+            for company, count in company_counts.items():
+                # Format company name consistently
+                company_name = company
+                if len(company_name) > 35:
+                    company_name = company_name[:32] + '...'
+                
+                # Calculate percentage
+                percentage = (count / total_tickets) * 100
+                
+                # Set fill color for alternating rows
+                if row_color:
+                    pdf.set_fill_color(249, 250, 251)  # Light grey
+                else:
+                    pdf.set_fill_color(255, 255, 255)  # White
+                
+                # Add data cells
+                pdf.cell(135, 7, company_name, 1, 0, 'L', row_color)
+                pdf.cell(45, 7, str(count), 1, 1, 'C', row_color)
+                
+                row_color = not row_color  # Alternate row color
         
         pdf.ln(15)
         
@@ -1289,105 +1225,64 @@ else:
         pdf.multi_cell(0, 5, 'The following table shows tickets with "Done yet?" status, requiring final verification:')
         pdf.ln(5)
         
-        # Extract "Done Yet" tickets from the dataframe
-        # Check for tickets with "Done yet" or similar status in Status or Summary
-        done_yet_tickets = None
-        
+        # Get tickets with "Done yet?" status
         if 'Status' in dataframe.columns:
-            # Try to find by status first
-            done_yet_mask = dataframe['Status'].str.contains('Done yet|Done Yet|DoneYet|Ready for Review', case=False, na=False)
-            if done_yet_mask.any():
-                done_yet_tickets = dataframe[done_yet_mask].copy()
-        
-        # If no tickets found by status, try looking in Summary Description
-        if (done_yet_tickets is None or done_yet_tickets.empty) and 'Summary Description' in dataframe.columns:
-            done_yet_mask = dataframe['Summary Description'].str.contains('Done yet|Done Yet|DoneYet|Ready for Review', case=False, na=False)
-            if done_yet_mask.any():
-                done_yet_tickets = dataframe[done_yet_mask].copy()
-        
-        # If still no tickets found, create a sample placeholder with a few tickets from the main dataset
-        if done_yet_tickets is None or done_yet_tickets.empty:
-            # Get a sample of tickets to show as "Done Yet" examples
-            if len(dataframe) > 0:
-                done_yet_tickets = dataframe.head(5).copy()
+            done_yet_tickets = dataframe[dataframe['Status'].str.contains('Done yet', case=False, na=False)].head(5)
+            
+            if not done_yet_tickets.empty:
+                # Create table header with colored background
+                pdf.set_fill_color(239, 246, 255)  # Light blue background
+                pdf.set_text_color(30, 58, 138)    # Dark blue text
+                pdf.set_font('Arial', 'B', 9)
+                pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
+                pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
+                pdf.cell(35, 7, 'Company', 1, 0, 'C', 1)
+                pdf.cell(35, 7, 'Resource', 1, 0, 'C', 1)
+                pdf.cell(85, 7, 'Summary', 1, 1, 'C', 1)
+                
+                # Add table data
+                pdf.set_font('Arial', '', 8)
+                pdf.set_text_color(0, 0, 0)
+                
+                # Alternate row colors for better readability
+                row_color = False
+                
+                for _, row in done_yet_tickets.iterrows():
+                    # Get values with fallback for missing columns
+                    ticket_num = str(row.get('Ticket #', 'N/A'))
+                    priority = str(row.get('Priority', 'N/A'))
+                    age = str(row.get('Age', 'N/A')) if 'Age' in row else 'N/A'
+                    company = str(row.get('Company', 'N/A'))
+                    resource = str(row.get('Resources', 'N/A'))
+                    summary = str(row.get('Summary Description', 'N/A'))
+                    
+                    # Truncate long fields
+                    if len(summary) > 45:
+                        summary = summary[:42] + '...'
+                    if len(company) > 12:
+                        company = company[:9] + '...'
+                    if len(resource) > 12:
+                        resource = resource[:9] + '...'
+                    
+                    # Set fill color for alternating rows
+                    if row_color:
+                        pdf.set_fill_color(249, 250, 251)  # Light grey
+                    else:
+                        pdf.set_fill_color(255, 255, 255)  # White
+                    
+                    # Add data cells
+                    pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
+                    pdf.cell(15, 7, age[:9], 1, 0, 'L', row_color)
+                    pdf.cell(35, 7, company, 1, 0, 'L', row_color)
+                    pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
+                    pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
+                    
+                    row_color = not row_color  # Alternate row color
             else:
-                # Fallback to an empty DataFrame with the right columns
-                done_yet_tickets = pd.DataFrame(columns=['Ticket #', 'Age', 'Company', 'Resources', 'Summary Description'])
-        
-        # Make sure we have the necessary columns with the right names
-        column_mapping = {
-            'Ticket #': 'Ticket #',
-            'Age': 'Age',
-            'Age_Numeric': 'Age',  # Use Age_Numeric if available
-            'Company': 'Company',
-            'Resources': 'Resource',  # Map Resources to Resource for consistency
-            'Summary Description': 'Summary'  # Map Summary Description to Summary
-        }
-        
-        # Create a new DataFrame with standardized column names
-        done_yet_data = {}
-        for new_col, old_col in column_mapping.items():
-            if old_col in done_yet_tickets.columns:
-                done_yet_data[new_col] = done_yet_tickets[old_col].tolist()
-            elif new_col == 'Resource' and 'Resources' in done_yet_tickets.columns:
-                done_yet_data['Resource'] = done_yet_tickets['Resources'].tolist()
-            elif new_col == 'Summary' and 'Summary Description' in done_yet_tickets.columns:
-                done_yet_data['Summary'] = done_yet_tickets['Summary Description'].tolist()
-        
-        # Create a proper DataFrame for the table
-        done_yet_tickets = pd.DataFrame(done_yet_data)
-        
-        # Limit to top 10 done yet tickets
-        done_yet_tickets = done_yet_tickets.head(10)
-        
-        # Create table header with colored background
-        pdf.set_fill_color(239, 246, 255)  # Light blue background
-        pdf.set_text_color(30, 58, 138)    # Dark blue text
-        pdf.set_font('Arial', 'B', 9)
-        pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
-        pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Company', 1, 0, 'C', 1)
-        pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Summary', 1, 1, 'C', 1)
-        
-        # Add table data
-        pdf.set_font('Arial', '', 8)
-        pdf.set_text_color(0, 0, 0)
-        
-        # Alternate row colors for better readability
-        row_color = False
-        
-        for _, row in done_yet_tickets.iterrows():
-            # Get values with fallback for missing columns and sanitize text for PDF
-            ticket_num = str(row.get('Ticket #', 'N/A'))
-            age = str(row.get('Age', 'N/A'))
-            company = sanitize_for_pdf(str(row.get('Company', 'N/A')))
-            resource = sanitize_for_pdf(str(row.get('Resource', 'N/A')))
-            summary = sanitize_for_pdf(str(row.get('Summary', 'N/A')))
+                pdf.set_font('Arial', 'I', 10)
+                pdf.cell(0, 10, 'No tickets with "Done yet?" status found in the current dataset.', 0, 1, 'L')
             
-            # Truncate long fields, but keep full company name
-            if len(summary) > 45:
-                summary = summary[:42] + '...'
-            # No truncation for company name as requested
-            if len(resource) > 12:
-                resource = resource[:9] + '...'
-            
-            # Set fill color for alternating rows
-            if row_color:
-                pdf.set_fill_color(249, 250, 251)  # Light grey
-            else:
-                pdf.set_fill_color(255, 255, 255)  # White
-            
-            # Add data cells
-            pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
-            pdf.cell(15, 7, str(age)[:9], 1, 0, 'L', row_color)
-            pdf.cell(65, 7, company, 1, 0, 'L', row_color)
-            pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
-            pdf.cell(65, 7, summary, 1, 1, 'L', row_color)
-            
-            row_color = not row_color  # Alternate row color
-            
-        pdf.ln(20)
+            pdf.ln(20)
         
         # Move to page 3 for Top 10 Oldest Tickets
         pdf.add_page()
@@ -1397,97 +1292,58 @@ else:
         pdf.set_text_color(30, 58, 138)
         pdf.cell(0, 10, 'Top 10 Oldest Tickets', 0, 1, 'L')
         
-        # Extract the top 10 oldest tickets from the dataframe
-        oldest_tickets = None
-        
         if 'Age_Numeric' in dataframe.columns:
-            # Use Age_Numeric for sorting if available
-            oldest_tickets = dataframe.sort_values('Age_Numeric', ascending=False).head(10).copy()
-        elif 'Age' in dataframe.columns:
-            # Try to convert Age to numeric for sorting
-            try:
-                # Convert age to numeric, errors='coerce' will set invalid parsing as NaN
-                dataframe['Age_Temp'] = pd.to_numeric(dataframe['Age'], errors='coerce')
-                oldest_tickets = dataframe.sort_values('Age_Temp', ascending=False).head(10).copy()
-                # Drop temporary column
-                if 'Age_Temp' in oldest_tickets.columns:
-                    oldest_tickets = oldest_tickets.drop('Age_Temp', axis=1)
-            except:
-                # If conversion fails, just take the first 10 records
-                oldest_tickets = dataframe.head(10).copy()
-        else:
-            # If no Age column, just use the first 10 records
-            oldest_tickets = dataframe.head(10).copy()
-        
-        # Make sure we have the necessary columns with the right names
-        column_mapping = {
-            'Ticket #': 'Ticket #',
-            'Age': 'Age',
-            'Age_Numeric': 'Age',  # Use Age_Numeric if available
-            'Company': 'Company',
-            'Resources': 'Resource',  # Map Resources to Resource for consistency
-            'Summary Description': 'Summary'  # Map Summary Description to Summary
-        }
-        
-        # Create a new DataFrame with standardized column names
-        oldest_data = {}
-        for new_col, old_col in column_mapping.items():
-            if old_col in oldest_tickets.columns:
-                oldest_data[new_col] = oldest_tickets[old_col].tolist()
-            elif new_col == 'Resource' and 'Resources' in oldest_tickets.columns:
-                oldest_data['Resource'] = oldest_tickets['Resources'].tolist()
-            elif new_col == 'Summary' and 'Summary Description' in oldest_tickets.columns:
-                oldest_data['Summary'] = oldest_tickets['Summary Description'].tolist()
-        
-        # Create a proper DataFrame for the table
-        oldest = pd.DataFrame(oldest_data)
-        
-        # Create table header with colored background
-        pdf.set_fill_color(239, 246, 255)  # Light blue background
-        pdf.set_text_color(30, 58, 138)    # Dark blue text
-        pdf.set_font('Arial', 'B', 9)
-        pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
-        pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Company', 1, 0, 'C', 1)
-        pdf.cell(25, 7, 'Resource', 1, 0, 'C', 1)
-        pdf.cell(65, 7, 'Summary', 1, 1, 'C', 1)
-        
-        # Add table data
-        pdf.set_font('Arial', '', 8)
-        pdf.set_text_color(0, 0, 0)
-        
-        # Alternate row colors for better readability
-        row_color = False
-        
-        for _, row in oldest.iterrows():
-            # Get values with fallback for missing columns and sanitize for PDF
-            ticket_num = str(row.get('Ticket #', 'N/A'))
-            age = str(row.get('Age', 'N/A'))
-            company = sanitize_for_pdf(str(row.get('Company', 'N/A')))
-            resource = sanitize_for_pdf(str(row.get('Resource', 'N/A')))
-            summary = sanitize_for_pdf(str(row.get('Summary', 'N/A')))
+            oldest = dataframe.sort_values('Age_Numeric', ascending=False).head(10)
             
-            # Truncate long fields, but keep full company name
-            if len(summary) > 40:
-                summary = summary[:37] + '...'
-            # No truncation for company name as requested
-            if len(resource) > 12:
-                resource = resource[:9] + '...'
+            # Create table header with colored background
+            pdf.set_fill_color(239, 246, 255)  # Light blue background
+            pdf.set_text_color(30, 58, 138)    # Dark blue text
+            pdf.set_font('Arial', 'B', 9)
+            pdf.cell(20, 7, 'Ticket #', 1, 0, 'C', 1)
+            pdf.cell(15, 7, 'Age', 1, 0, 'C', 1)
+            pdf.cell(35, 7, 'Company', 1, 0, 'C', 1)
+            pdf.cell(35, 7, 'Resource', 1, 0, 'C', 1)
+            pdf.cell(85, 7, 'Summary', 1, 1, 'C', 1)
             
-            # Set fill color for alternating rows
-            if row_color:
-                pdf.set_fill_color(249, 250, 251)  # Light grey
-            else:
-                pdf.set_fill_color(255, 255, 255)  # White
+            # Add table data
+            pdf.set_font('Arial', '', 8)
+            pdf.set_text_color(0, 0, 0)
             
-            # Add data cells
-            pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
-            pdf.cell(15, 7, str(age)[:9], 1, 0, 'L', row_color)
-            pdf.cell(65, 7, company, 1, 0, 'L', row_color)
-            pdf.cell(25, 7, resource, 1, 0, 'L', row_color)
-            pdf.cell(65, 7, summary, 1, 1, 'L', row_color)
+            # Alternate row colors for better readability
+            row_color = False
             
-            row_color = not row_color  # Alternate row color
+            for _, row in oldest.iterrows():
+                # Get values with fallback for missing columns
+                ticket_num = str(row.get('Ticket #', 'N/A'))
+                priority = str(row.get('Priority', 'N/A'))
+                age = str(row.get('Age', 'N/A'))
+                status = str(row.get('Status', 'N/A'))
+                company = str(row.get('Company', 'N/A'))
+                resource = str(row.get('Resources', 'N/A'))
+                summary = str(row.get('Summary Description', 'N/A'))
+                
+                # Truncate long fields
+                if len(summary) > 40:
+                    summary = summary[:37] + '...'
+                if len(company) > 12:
+                    company = company[:9] + '...'
+                if len(resource) > 12:
+                    resource = resource[:9] + '...'
+                
+                # Set fill color for alternating rows
+                if row_color:
+                    pdf.set_fill_color(249, 250, 251)  # Light grey
+                else:
+                    pdf.set_fill_color(255, 255, 255)  # White
+                
+                # Add data cells
+                pdf.cell(20, 7, ticket_num[:9], 1, 0, 'L', row_color)
+                pdf.cell(15, 7, age[:9], 1, 0, 'L', row_color)
+                pdf.cell(35, 7, company, 1, 0, 'L', row_color)
+                pdf.cell(35, 7, resource, 1, 0, 'L', row_color)
+                pdf.cell(85, 7, summary, 1, 1, 'L', row_color)
+                
+                row_color = not row_color  # Alternate row color
         
         # No contact information footer as requested
         
