@@ -506,6 +506,18 @@ with st.sidebar:
                                                options=sorted_teams,
                                                default=[],
                                                help="Select multiple teams to filter by")
+            
+            # Add Service Board filter if column exists
+            if 'Service Board' in st.session_state.data.columns:
+                # Get unique service boards, filtering out NaN values and convert to string
+                service_boards = st.session_state.data['Service Board'].dropna().astype(str).unique().tolist()
+                # Sort service boards alphabetically
+                sorted_service_boards = sorted(service_boards)
+                # Use selectbox for Service Board
+                service_board_options = ['All'] + sorted_service_boards
+                selected_service_board = st.selectbox("Service Board", 
+                                                     service_board_options,
+                                                     help="Filter tickets by service board")
                 
             # Add checkbox for unassigned tickets
             st.markdown("---")
@@ -562,6 +574,13 @@ else:
             st.sidebar.success(f"Filtering by team: {selected_teams[0]}")
         else:
             st.sidebar.success(f"Filtering by {len(selected_teams)} teams")
+            
+    # Apply Service Board filter if selected
+    if 'selected_service_board' in locals() and selected_service_board != 'All':
+        # Convert Service Board column to string to ensure consistent comparison
+        filtered_df['Service Board'] = filtered_df['Service Board'].astype(str)
+        filtered_df = filtered_df[filtered_df['Service Board'] == selected_service_board]
+        st.sidebar.success(f"Filtering by service board: {selected_service_board}")
     
     # Filter for unassigned tickets if the checkbox is selected
     if 'show_unassigned_only' in locals() and show_unassigned_only:
